@@ -46,8 +46,12 @@ class BackendConnection {
       this.connectedSubject.next(true);
     });
     this.ws.addEventListener("close", event => {
-      console.warn("Connection closed:", event.reason);
+      console.warn("Connection closed:", event.reason, "Retry in 1 second.");
       this.connectedSubject.next(false);
+
+      setTimeout(() => {
+        this.connect();
+      }, 1000);
     });
     this.ws.addEventListener("error", err => {
       console.error("Socket error:", err);
