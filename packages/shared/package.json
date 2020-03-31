@@ -1,0 +1,18 @@
+{
+  "private": true,
+  "name": "@group-sketch/shared",
+  "version": "0.0.1",
+  "description": "",
+  "main": "js/index.js",
+  "typings": "js/index",
+  "scripts": {
+    "build": "rimraf ./js && tsc --newLine \"lf\" -p .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "rimraf": "3.0.2",
+    "typescript": "3.8.3"
+  },
+  "author": "Marvin Davieds"
+}

@@ -1,0 +1,22 @@
+{
+  "name": "@group-sketch/server",
+  "version": "0.1.0",
+  "main": "dist/main.js",
+  "repository": "https://github.com/marvindv/group-sketch",
+  "author": "Marvin Davieds",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "build": "rimraf ./dist && tsc -p .",
+    "start": "node ./dist/main.js"
+  },
+  "dependencies": {
+    "@group-sketch/shared": "0.0.1",
+    "ws": "7.2.3"
+  },
+  "devDependencies": {
+    "@types/ws": "7.2.3",
+    "rimraf": "3.0.2",
+    "typescript": "3.8.3"
+  }
+}

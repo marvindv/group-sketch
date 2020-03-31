@@ -1,14 +1,20 @@
 <template>
   <div class="sketch-pad">
-    <canvas ref="canvas" @mouseup="onMouseUp" @mousemove="onMouseMove" width="400" height="400"></canvas>
+    <canvas
+      ref="canvas"
+      @mouseup="onMouseUp"
+      @mousemove="onMouseMove"
+      @mouseleave="onMouseLeave"
+      width="400"
+      height="400"
+    ></canvas>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue, Ref, Emit } from "vue-property-decorator";
 
-import Path from "@/models/Path";
-import Point from "@/models/Point";
+import { Path, Point } from "@group-sketch/shared";
 
 /**
  * The component the user can draw on and displays drawings of other users.
@@ -60,11 +66,11 @@ export default class SketchPad extends Vue {
    * button is released. If a path was drawn, the path is emitted via the `next-path` event.
    */
   onMouseUp() {
-    if (this.currentPath.length > 1) {
-      this.emitNextPath();
-    }
+    this.completeCurrentPath();
+  }
 
-    this.currentPath = [];
+  onMouseLeave() {
+    this.completeCurrentPath();
   }
 
   @Emit("next-path")
@@ -137,8 +143,15 @@ export default class SketchPad extends Vue {
     this.ctx.stroke();
     this.ctx.closePath();
   }
+
+  private completeCurrentPath() {
+    if (this.currentPath.length > 1) {
+      this.emitNextPath();
+    }
+
+    this.currentPath = [];
+  }
 }
 </script>
 
-<style scoped lang="scss">
-</style>
+<style scoped lang="scss"></style>
