@@ -4,7 +4,7 @@
   "main": "dist/main.js",
   "repository": "https://github.com/marvindv/group-sketch",
   "author": "Marvin Davieds",
-  "license": "MIT",
+  "license": "AGPL-3.0",
   "private": true,
   "scripts": {
     "build": "rimraf ./dist && tsc -p .",
