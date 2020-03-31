@@ -7,7 +7,7 @@ wss.on("connection", function connection(ws) {
   ws.on("message", data => {
     console.log("received: %s", data);
 
-    const message = extractMessage(data);
+    const message = extractMessage(data.toString());
     switch (message.type) {
       case MessageType.NextPath:
         wss.clients.forEach(client => {
