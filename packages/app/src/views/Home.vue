@@ -35,7 +35,7 @@ class BackendConnection {
 
   constructor(private address: string) {}
 
-  connect() {
+  connect(roomId: string) {
     if (this.ws) {
       // TODO
     }
@@ -43,6 +43,7 @@ class BackendConnection {
     this.ws = new WebSocket(this.address);
     this.ws.addEventListener("open", () => {
       console.log("open");
+      this.send({ type: MessageType.EnterRoom, roomId });
       this.connectedSubject.next(true);
     });
     this.ws.addEventListener("close", event => {
@@ -50,12 +51,12 @@ class BackendConnection {
       this.connectedSubject.next(false);
 
       setTimeout(() => {
-        this.connect();
-      }, 1000);
+        this.connect(roomId);
+      }, 3000);
     });
     this.ws.addEventListener("error", err => {
       console.error("Socket error:", err);
-      this.ws.close();
+      this.ws!.close();
     });
     this.ws.addEventListener("message", event => {
       const message = extractMessage(event.data);
@@ -64,7 +65,9 @@ class BackendConnection {
   }
 
   send(message: Message) {
-    this.ws.send(prepareMessage(message));
+    if (this.ws) {
+      this.ws.send(prepareMessage(message));
+    }
   }
 }
 
@@ -109,7 +112,7 @@ export default class Home extends Vue {
       }
     });
 
-    this.backend.connect();
+    this.backend.connect("default");
   }
 }
 </script>
