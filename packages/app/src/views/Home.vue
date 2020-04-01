@@ -2,8 +2,12 @@
   <div class="home">
     <SketchPad ref="sketchPad" @next-path="onNextPath" />
 
-    <button type="button" @click="onClearClick">Clear</button>
-    <button type="button" @click="onRedrawClick">Redraw</button>
+    <button type="button" class="btn btn-secondary mr-3" @click="onClearClick">
+      Clear
+    </button>
+    <button type="button" class="btn btn-secondary" @click="onRedrawClick">
+      Redraw
+    </button>
   </div>
 </template>
 
