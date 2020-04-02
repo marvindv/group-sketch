@@ -5,6 +5,9 @@
       @mouseup="onMouseUp"
       @mousemove="onMouseMove"
       @mouseleave="onMouseLeave"
+      @touchstart="onTouchStart"
+      @touchmove="onTouchMove"
+      @touchend="onTouchEnd"
       width="500"
       height="500"
     ></canvas>
@@ -41,33 +44,8 @@ export default class SketchPad extends Vue {
    * a line is drawn.
    */
   onMouseMove(event: MouseEvent) {
-    const coords = this.getCoords(event);
-    const [x, y] = coords;
-
-    console.warn(event);
-
-    if (
-      this.ctx &&
-      this.prevX !== null &&
-      this.prevY !== null &&
-      this.enabled
-    ) {
-      if (event.buttons === 1) {
-        this.ctx.beginPath();
-        this.ctx.lineWidth = 1;
-        this.ctx.lineCap = "round";
-        this.ctx.strokeStyle = "blue";
-        this.ctx.moveTo(this.prevX, this.prevY);
-        this.ctx.lineTo(x, y);
-        this.currentPath.push(coords);
-
-        this.ctx.stroke();
-        this.ctx.closePath();
-      }
-    }
-
-    this.prevX = x;
-    this.prevY = y;
+    const coords = this.getMouseCoords(event);
+    this.processCoords(coords, event.buttons === 1);
   }
 
   /**
@@ -80,6 +58,35 @@ export default class SketchPad extends Vue {
 
   onMouseLeave() {
     this.completeCurrentPath();
+  }
+
+  onTouchStart(event: TouchEvent) {
+    const coords = this.getTouchCoords(event);
+    this.prevX = coords[0];
+    this.prevY = coords[1];
+
+    event.preventDefault();
+    return false;
+  }
+
+  onTouchMove(event: TouchEvent) {
+    event.preventDefault();
+
+    if (event.touches) {
+      if (event.touches.length == 1) {
+        // Ignore touch inputs with more than one finger.
+        const coords = this.getTouchCoords(event);
+        this.processCoords(coords, true);
+      }
+    }
+
+    return false;
+  }
+
+  onTouchEnd(event: TouchEvent) {
+    this.completeCurrentPath();
+    event.preventDefault();
+    return false;
   }
 
   @Emit("next-path")
@@ -129,11 +136,53 @@ export default class SketchPad extends Vue {
     }
   }
 
-  private getCoords(event: MouseEvent): Point {
+  private getMouseCoords(event: MouseEvent): Point {
     const canvas = event.target as HTMLCanvasElement;
     const rect = canvas.getBoundingClientRect();
 
     return [event.clientX - rect.left, event.clientY - rect.top];
+  }
+
+  private getTouchCoords(event: TouchEvent): Point {
+    const canvas = event.target as HTMLCanvasElement;
+    const rect = canvas.getBoundingClientRect();
+
+    return [
+      event.touches[0]!.clientX - rect.left,
+      event.touches[0]!.clientY - rect.top
+    ];
+  }
+
+  /**
+   * Processes new coords, either from mouse or from touch input.
+   *
+   * @param {boolean} drawLine The value indicating whether the line should actually be drawn to
+   *   this coordinates. If this is `false`, the properties `prevX` and `prevY` will still be set.
+   */
+  private processCoords(coords: [number, number], drawLine: boolean) {
+    const [x, y] = coords;
+
+    if (
+      this.ctx &&
+      this.prevX !== null &&
+      this.prevY !== null &&
+      this.enabled &&
+      drawLine
+    ) {
+      this.ctx.beginPath();
+      this.ctx.lineWidth = 1;
+      this.ctx.lineCap = "round";
+      this.ctx.strokeStyle = "blue";
+      this.ctx.moveTo(this.prevX, this.prevY);
+      this.ctx.lineTo(x, y);
+      this.currentPath.push(coords);
+
+      this.ctx.stroke();
+      this.ctx.closePath();
+    }
+
+    this.prevX = x;
+    this.prevY = y;
   }
 
   private drawBorder() {
