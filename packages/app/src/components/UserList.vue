@@ -39,7 +39,7 @@ import User from "../models/user";
 export default class UserList extends Vue {
   @Prop({ type: Array, required: true }) users!: User[];
 
-  @Prop({ type: Boolean, required: true }) canSelect: boolean;
+  @Prop({ type: Boolean, required: true }) canSelect!: boolean;
 
   @Emit("user-selected")
   onSelectUser(user: User) {

@@ -17,11 +17,11 @@
             @user-selected="onUserSelected"
           />
           <div v-if="isSketcher" class="text-info mt-3">
-            Wähle die Spieler, die den Begriff erraten haben hier.
+            Klicke auf den TeilnehmerInn, der/die den Begriff erraten hat.
           </div>
         </div>
 
-        <div class="col text-center">
+        <div class="col text-center sketchpad-col">
           <h4 class="text-center">
             <small class="text-muted">Magic happens here</small>
           </h4>
@@ -210,5 +210,9 @@ export default class Room extends Vue {
   .guess-word {
     font-size: 1.5rem;
   }
+}
+
+.sketchpad-col {
+  user-select: none;
 }
 </style>

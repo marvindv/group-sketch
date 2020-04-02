@@ -62,10 +62,6 @@ export default class BackendConnection {
     nickname = nickname.trim();
 
     return new Promise<void>((resolve, reject) => {
-      if (this.ws) {
-        // TODO
-      }
-
       let resolved = false;
 
       this.ws = new WebSocket(this.address);
