@@ -58,6 +58,8 @@
 </template>
 
 <script lang="ts">
+import { Subject } from "rxjs";
+import { distinctUntilChanged, pairwise, takeUntil } from "rxjs/operators";
 import { Component, Vue, Ref, Prop } from "vue-property-decorator";
 import { MessageType, Path, MessageError } from "@group-sketch/shared";
 
@@ -65,7 +67,6 @@ import SketchPad from "@/components/SketchPad.vue";
 import UserList from "@/components/UserList.vue";
 import BackendConnection from "../backend-connection";
 import User from "../models/user";
-import { distinctUntilChanged, pairwise } from "rxjs/operators";
 import config from "../config";
 
 @Component({
@@ -94,6 +95,8 @@ export default class Room extends Vue {
 
   private backend: BackendConnection | undefined;
 
+  private dispose$ = new Subject();
+
   onNextPath(path: Path) {
     this.paths = [...this.paths, path];
     if (this.backend) {
@@ -119,22 +122,24 @@ export default class Room extends Vue {
   mounted() {
     this.backend = new BackendConnection(config.apiAddress());
     this.backend.connected$
-      .pipe(distinctUntilChanged(), pairwise())
+      .pipe(distinctUntilChanged(), pairwise(), takeUntil(this.dispose$))
       .subscribe(([connA, connB]) => {
         if (connA && !connB) {
           this.connectionLost = true;
         }
       });
-    this.backend.users$.subscribe(users => {
+    this.backend.users$.pipe(takeUntil(this.dispose$)).subscribe(users => {
       this.users = users;
     });
-    this.backend.isSketcher$.subscribe(isSketcher => {
-      this.isSketcher = isSketcher;
-    });
-    this.backend.guessWord$.subscribe(
-      guessWord => (this.guessWord = guessWord)
-    );
-    this.backend.message$.subscribe(message => {
+    this.backend.isSketcher$
+      .pipe(takeUntil(this.dispose$))
+      .subscribe(isSketcher => {
+        this.isSketcher = isSketcher;
+      });
+    this.backend.guessWord$
+      .pipe(takeUntil(this.dispose$))
+      .subscribe(guessWord => (this.guessWord = guessWord));
+    this.backend.message$.pipe(takeUntil(this.dispose$)).subscribe(message => {
       switch (message.type) {
         case MessageType.NextPath:
           if (this.sketchPad) {
@@ -142,7 +147,6 @@ export default class Room extends Vue {
           }
 
           break;
-
         case MessageType.RoomEntered:
           this.chatEntries = [...this.chatEntries, "Willkommen!"];
           break;
@@ -169,9 +173,11 @@ export default class Room extends Vue {
           break;
       }
     });
-    this.backend.sketcherChanged$.subscribe(() => {
-      this.sketchPad?.clear();
-    });
+    this.backend.sketcherChanged$
+      .pipe(takeUntil(this.dispose$))
+      .subscribe(() => {
+        this.sketchPad?.clear();
+      });
 
     this.backend
       .connect(this.nickname, this.id)
@@ -186,6 +192,9 @@ export default class Room extends Vue {
     if (this.backend) {
       this.backend.close();
     }
+
+    this.dispose$.next();
+    this.dispose$.complete();
   }
 }
 </script>
