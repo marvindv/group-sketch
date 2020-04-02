@@ -53,19 +53,6 @@
           </div>
         </div>
       </div>
-
-      <div class="text-center mt-3">
-        <button
-          type="button"
-          class="btn btn-secondary mr-3"
-          @click="onClearClick"
-        >
-          Clear
-        </button>
-        <button type="button" class="btn btn-secondary" @click="onRedrawClick">
-          Redraw
-        </button>
-      </div>
     </div>
   </div>
 </template>
