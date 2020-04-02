@@ -53,6 +53,11 @@ export default class Client {
         this.room.removeClient(this);
       }
     });
+
+    ws.on("error", err => {
+      console.log("Error on connection");
+      this.room?.removeClient(this);
+    });
   }
 
   getNickname(): string | undefined {
