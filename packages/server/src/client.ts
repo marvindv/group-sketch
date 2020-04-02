@@ -4,22 +4,24 @@ import {
   EnterRoomMessage,
   Message,
   MessageType,
-  prepareMessage
+  prepareMessage,
+  MessageError,
+  NextPathMessage,
+  TextMessage,
+  CompleteSketchingMessage
 } from "@group-sketch/shared";
 
 import Room from "./room";
-import { NextPathMessage } from "@group-sketch/shared";
-import { TextMessage } from "@group-sketch/shared";
 
 enum ClientState {
   AwaitRoom,
   Guesser,
   Sketcher
 }
-
 export default class Client {
   private state: ClientState = ClientState.AwaitRoom;
   private room: Room | undefined;
+  private nickname: string | undefined;
 
   constructor(private ws: WebSocket) {
     ws.on("message", data => {
@@ -38,11 +40,31 @@ export default class Client {
         case MessageType.Text:
           this.handleText(message);
           break;
+
+        case MessageType.CompleteSketching:
+          this.handleCompleteSketching(message);
+          break;
+      }
+    });
+
+    ws.on("close", () => {
+      if (this.room) {
+        console.log("Remove connection");
+        this.room.removeClient(this);
       }
     });
   }
 
+  getNickname(): string | undefined {
+    return this.nickname;
+  }
+
+  setSketcher(isSketcher: boolean) {
+    this.state = isSketcher ? ClientState.Sketcher : ClientState.Guesser;
+  }
+
   send(message: Message) {
+    console.log("SEND to", this.nickname + ":", message);
     this.ws.send(prepareMessage(message));
   }
 
@@ -55,14 +77,28 @@ export default class Client {
       return;
     }
 
-    this.state = ClientState.Sketcher;
+    this.state = ClientState.Guesser;
     const room = Room.getById(message.roomId);
     if (!room) {
-      console.error("User tried to access non existing room", room);
+      console.error("User tried to access non existing room", message.roomId);
+      this.ws.close(MessageError.RoomNotFound);
+      return;
+    }
+
+    const nickname = message.nickname.trim();
+    if (room.hasClient(nickname)) {
+      console.error(
+        "User tried to access room",
+        message.roomId,
+        "with existing nickname",
+        nickname
+      );
+      this.ws.close(MessageError.NicknameInUse);
       return;
     }
 
     this.room = room;
+    this.nickname = nickname;
     this.room.addClient(this);
   }
 
@@ -86,5 +122,17 @@ export default class Client {
       );
       return;
     }
+  }
+
+  private handleCompleteSketching(message: CompleteSketchingMessage) {
+    if (this.state !== ClientState.Sketcher) {
+      console.error(
+        "Received CompleteSketching from client in state",
+        ClientState[this.state]
+      );
+      return;
+    }
+
+    this.room!.completeSketching(message);
   }
 }

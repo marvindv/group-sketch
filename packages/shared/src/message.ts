@@ -1,40 +1,99 @@
 import Path from "./path";
 
+/**
+ * The possible error resonse codes used for handling messages. Since the error code is passed to
+ * websocket.close it must start be between 4000 and 4999.
+ * See https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent
+ */
+export enum MessageError {
+  RoomNotFound = 4000,
+  NicknameInUse,
+  Other
+}
+
 export enum MessageType {
   EnterRoom,
+  RoomEntered,
+  NewUser,
+  UserLeft,
   Text,
-  NextPath
+  NextPath,
+  CompleteSketching,
+  NextSketcher
 }
 
-export interface BaseMessage {
-  type: MessageType;
-  nextPath?: Path | undefined;
-  text?: string | undefined;
-  roomId?: string | undefined;
-}
-
-export interface NextPathMessage extends BaseMessage {
+export interface NextPathMessage {
   type: MessageType.NextPath;
   nextPath: Path;
-  text?: undefined;
-  roomId?: undefined;
 }
 
-export interface EnterRoomMessage extends BaseMessage {
+export interface EnterRoomMessage {
   type: MessageType.EnterRoom;
-  nextPath?: undefined;
-  text?: undefined;
   roomId: string;
+  nickname: string;
 }
 
-export interface TextMessage extends BaseMessage {
+export interface RoomEnteredMessage {
+  type: MessageType.RoomEntered;
+  nicknames: string[];
+  currentSketcher: string | undefined;
+}
+
+export interface NewUserMessage {
+  type: MessageType.NewUser;
+  nickname: string;
+}
+
+export interface UserLeftMessage {
+  type: MessageType.UserLeft;
+  nickname: string;
+}
+
+export interface TextMessage {
   type: MessageType.Text;
-  nextPath?: undefined;
   text: string;
-  roomId?: undefined;
 }
 
-export type Message = NextPathMessage | EnterRoomMessage | TextMessage;
+/**
+ * The sketcher sends this message to end the sketching. Contains the right guesser if there was
+ * one. Is then broadcasted with the attached guess-word to all clients by the server.
+ */
+export interface CompleteSketchingMessage {
+  type: MessageType.CompleteSketching;
+  /**
+   * Is `null` if no one guessed right.
+   */
+  rightGuessByNickname: string | null;
+
+  /**
+   * The actual guess word. Is attached by the server on broadcast.
+   */
+  guessWord?: string;
+}
+
+export interface NextSketcherMessage {
+  type: MessageType.NextSketcher;
+
+  /**
+   * The nickname of the user to sketch.
+   */
+  nickname: string;
+
+  /**
+   * Is attached only for the guesser.
+   */
+  guessWord?: string;
+}
+
+export type Message =
+  | NextPathMessage
+  | EnterRoomMessage
+  | RoomEnteredMessage
+  | NewUserMessage
+  | UserLeftMessage
+  | TextMessage
+  | CompleteSketchingMessage
+  | NextSketcherMessage;
 
 export function extractMessage(messageData: string): Message {
   let json: any;

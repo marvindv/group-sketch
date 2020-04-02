@@ -5,14 +5,14 @@
       @mouseup="onMouseUp"
       @mousemove="onMouseMove"
       @mouseleave="onMouseLeave"
-      width="400"
-      height="400"
+      width="500"
+      height="500"
     ></canvas>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Ref, Emit } from "vue-property-decorator";
+import { Component, Vue, Ref, Emit, Prop } from "vue-property-decorator";
 
 import { Path, Point } from "@group-sketch/shared";
 
@@ -22,6 +22,8 @@ import { Path, Point } from "@group-sketch/shared";
 @Component
 export default class SketchPad extends Vue {
   @Ref() readonly canvas!: HTMLCanvasElement;
+
+  @Prop({ type: Boolean, required: true }) readonly enabled!: boolean;
 
   private ctx: CanvasRenderingContext2D | null = null;
 
@@ -42,7 +44,14 @@ export default class SketchPad extends Vue {
     const coords = this.getCoords(event);
     const [x, y] = coords;
 
-    if (this.ctx && this.prevX !== null && this.prevY !== null) {
+    console.warn(event);
+
+    if (
+      this.ctx &&
+      this.prevX !== null &&
+      this.prevY !== null &&
+      this.enabled
+    ) {
       if (event.buttons === 1) {
         this.ctx.beginPath();
         this.ctx.lineWidth = 1;
@@ -83,7 +92,7 @@ export default class SketchPad extends Vue {
    */
   clear() {
     if (this.ctx) {
-      this.ctx.clearRect(0, 0, 400, 400);
+      this.ctx.clearRect(0, 0, 500, 500);
       this.drawBorder();
     }
   }
@@ -134,11 +143,11 @@ export default class SketchPad extends Vue {
 
     this.ctx.beginPath();
     this.ctx.lineWidth = 2;
-    this.ctx.strokeStyle = "black";
+    this.ctx.strokeStyle = "rgba(0, 0, 0, 0.125)";
     this.ctx.moveTo(0, 0);
-    this.ctx.lineTo(400, 0);
-    this.ctx.lineTo(400, 400);
-    this.ctx.lineTo(0, 400);
+    this.ctx.lineTo(500, 0);
+    this.ctx.lineTo(500, 500);
+    this.ctx.lineTo(0, 500);
     this.ctx.lineTo(0, 0);
     this.ctx.stroke();
     this.ctx.closePath();
