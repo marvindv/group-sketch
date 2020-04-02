@@ -79,6 +79,7 @@ import UserList from "@/components/UserList.vue";
 import BackendConnection from "../backend-connection";
 import User from "../models/user";
 import { distinctUntilChanged, pairwise } from "rxjs/operators";
+import config from "../config";
 
 @Component({
   components: { SketchPad, UserList }
@@ -129,7 +130,7 @@ export default class Room extends Vue {
   }
 
   mounted() {
-    this.backend = new BackendConnection("ws://10.0.200.1:8081");
+    this.backend = new BackendConnection(config.apiAddress());
     this.backend.connected$
       .pipe(distinctUntilChanged(), pairwise())
       .subscribe(([connA, connB]) => {
