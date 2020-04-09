@@ -46,11 +46,7 @@
             <small class="text-muted">Info</small>
           </h4>
 
-          <div class="chat">
-            <div v-for="(entry, key) in chatEntries" :key="key" class="entry">
-              {{ entry }}
-            </div>
-          </div>
+          <Chat :chatEntries="chatEntries" />
         </div>
       </div>
     </div>
@@ -65,12 +61,13 @@ import { MessageType, Path, MessageError } from "@group-sketch/shared";
 
 import SketchPad from "@/components/SketchPad.vue";
 import UserList from "@/components/UserList.vue";
+import Chat from "@/components/Chat.vue";
 import BackendConnection from "../backend-connection";
 import User from "../models/user";
 import config from "../config";
 
 @Component({
-  components: { SketchPad, UserList }
+  components: { SketchPad, UserList, Chat },
 })
 export default class Room extends Vue {
   @Ref() readonly sketchPad: SketchPad | undefined;
@@ -107,7 +104,7 @@ export default class Room extends Vue {
   onUserSelected(user: User) {
     this.backend?.send({
       type: MessageType.CompleteSketching,
-      rightGuessByNickname: user.nickname
+      rightGuessByNickname: user.nickname,
     });
   }
 
@@ -128,51 +125,53 @@ export default class Room extends Vue {
           this.connectionLost = true;
         }
       });
-    this.backend.users$.pipe(takeUntil(this.dispose$)).subscribe(users => {
+    this.backend.users$.pipe(takeUntil(this.dispose$)).subscribe((users) => {
       this.users = users;
     });
     this.backend.isSketcher$
       .pipe(takeUntil(this.dispose$))
-      .subscribe(isSketcher => {
+      .subscribe((isSketcher) => {
         this.isSketcher = isSketcher;
       });
     this.backend.guessWord$
       .pipe(takeUntil(this.dispose$))
-      .subscribe(guessWord => (this.guessWord = guessWord));
-    this.backend.message$.pipe(takeUntil(this.dispose$)).subscribe(message => {
-      switch (message.type) {
-        case MessageType.NextPath:
-          if (this.sketchPad) {
-            this.sketchPad.drawPaths([message.nextPath]);
-          }
+      .subscribe((guessWord) => (this.guessWord = guessWord));
+    this.backend.message$
+      .pipe(takeUntil(this.dispose$))
+      .subscribe((message) => {
+        switch (message.type) {
+          case MessageType.NextPath:
+            if (this.sketchPad) {
+              this.sketchPad.drawPaths([message.nextPath]);
+            }
 
-          break;
-        case MessageType.RoomEntered:
-          this.chatEntries = [...this.chatEntries, "Willkommen!"];
-          break;
-        case MessageType.NewUser:
-          this.chatEntries = [
-            ...this.chatEntries,
-            "Neuer Kumpel: " + message.nickname
-          ];
-          break;
-        case MessageType.UserLeft:
-          this.chatEntries = [
-            ...this.chatEntries,
-            "Kumpel ist abgehauen: " + message.nickname
-          ];
-          break;
-        case MessageType.CompleteSketching:
-          this.chatEntries = [
-            ...this.chatEntries,
-            '"' +
-              message.guessWord +
-              '" richtig geraten von: ' +
-              message.rightGuessByNickname
-          ];
-          break;
-      }
-    });
+            break;
+          case MessageType.RoomEntered:
+            this.chatEntries = [...this.chatEntries, "Willkommen!"];
+            break;
+          case MessageType.NewUser:
+            this.chatEntries = [
+              ...this.chatEntries,
+              "Neuer Kumpel: " + message.nickname,
+            ];
+            break;
+          case MessageType.UserLeft:
+            this.chatEntries = [
+              ...this.chatEntries,
+              "Kumpel ist abgehauen: " + message.nickname,
+            ];
+            break;
+          case MessageType.CompleteSketching:
+            this.chatEntries = [
+              ...this.chatEntries,
+              '"' +
+                message.guessWord +
+                '" richtig geraten von: ' +
+                message.rightGuessByNickname,
+            ];
+            break;
+        }
+      });
     this.backend.sketcherChanged$
       .pipe(takeUntil(this.dispose$))
       .subscribe(() => {
@@ -182,7 +181,7 @@ export default class Room extends Vue {
     this.backend
       .connect(this.nickname, this.id)
       .then(() => console.log("Connected!"))
-      .catch(err => {
+      .catch((err) => {
         console.error("Failed to connect", err);
         this.error = err;
       });
@@ -200,18 +199,6 @@ export default class Room extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.chat {
-  border: 1px solid rgba(0, 0, 0, 0.125);
-  height: 500px;
-  overflow-y: scroll;
-
-  padding: 0.5rem;
-
-  .entry {
-    padding: 0.5rem;
-  }
-}
-
 .sketcher-alert {
   max-width: 500px;
   margin: auto;
