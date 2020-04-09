@@ -1,3 +1,3 @@
 window["groupSketchConfig"] = {
-  apiAddress: "wss://sketch.marvindv.me/api"
+  apiAddress: "wss://sketch.marvindv.dev/api"
 };
