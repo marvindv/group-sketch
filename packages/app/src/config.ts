@@ -1,5 +1,7 @@
 const config = {
   apiAddress: () =>
-    window["groupSketchConfig"] ? window["groupSketchConfig"].apiAddress : ""
+    (window["groupSketchConfig"] && typeof  window["groupSketchConfig"].apiAddress === "string")
+      ? window["groupSketchConfig"].apiAddress
+      : ""
 };
 export default config;
