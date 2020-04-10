@@ -4,12 +4,16 @@ import {
   Message,
   MessageType,
   NextPathMessage,
-  prepareMessage
+  prepareMessage,
+  MessageError
 } from "@group-sketch/shared";
 import { Store } from "vuex";
 
 import { State } from "@/store";
-import Mutation, { ConnectionPendingPayload } from "@/store/mutations";
+import Mutation, {
+  ConnectionPendingPayload,
+  ConnectFailedPayload
+} from "@/store/mutations";
 
 /**
  * Encapsulated the websocket connection to the backend. Transmits data using the connection on
@@ -41,6 +45,16 @@ export default function createBackendPlugin(apiAddress: string) {
 
           ws.addEventListener("open", () => {
             send({ type: MessageType.EnterRoom, nickname, roomId });
+          });
+
+          ws.addEventListener("close", event => {
+            console.error(
+              `Connection closed: ${event.code}: ${MessageError[event.code]}`,
+              event
+            );
+            store.commit(Mutation.ConnectFailed, {
+              error: event.code
+            });
           });
 
           ws.addEventListener("error", err => {

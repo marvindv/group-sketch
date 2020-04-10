@@ -1,3 +1,5 @@
+import { MessageError } from "@group-sketch/shared";
+
 export enum Mutation {
   /**
    * Changes the `isConnected` state.
@@ -18,6 +20,13 @@ export enum Mutation {
    * Payload: {@link ConnectionPendingPayload}
    */
   ConnectPending = "CONNECT_PENDING",
+
+  /**
+   * Indicates that the connection attempt failed.
+   *
+   * Payload: {@link ConnectFailedPayload}
+   */
+  ConnectFailed = "CONNECT_FAILED",
 
   /**
    * A room was successfully entered.
@@ -73,6 +82,10 @@ export enum Mutation {
 export interface ConnectionPendingPayload {
   nickname: string;
   roomId: string;
+}
+
+export interface ConnectFailedPayload {
+  error: MessageError | number;
 }
 
 export default Mutation;

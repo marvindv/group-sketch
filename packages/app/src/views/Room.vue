@@ -1,12 +1,17 @@
 <template>
   <div class="container-fluid room">
-    <div v-if="error" class="alert alert-danger">Fehler {{ error }}</div>
+    <div v-if="connectFailureError" class="alert alert-danger">
+      <div v-if="connectFailureError === MessageError.NicknameInUse">
+        <strong>Fehler!</strong> Nickname vergeben
+      </div>
+      <div v-else>Fehler {{ connectFailureError }}</div>
+    </div>
     <div v-if="connectionLost" class="alert alert-danger">
       <strong>Verbindung abgebrochen!</strong>&nbsp;
       <a href="javascript:window.location.reload();">Seite neu laden</a>
     </div>
 
-    <div v-if="!error">
+    <div v-if="!connectFailureError">
       <div class="dashboard row">
         <div class="col">
           <h4>
@@ -65,7 +70,7 @@
 </template>
 
 <script lang="ts">
-import { Path, NextPathMessage } from "@group-sketch/shared";
+import { Path, NextPathMessage, MessageError } from "@group-sketch/shared";
 import Vue from "vue";
 import { mapGetters, mapState } from "vuex";
 
@@ -86,6 +91,11 @@ export default Vue.extend({
     id: { type: String },
     nickname: { type: String }
   },
+  data() {
+    return {
+      MessageError
+    };
+  },
   computed: {
     sketchPad: {
       cache: false,
@@ -96,6 +106,7 @@ export default Vue.extend({
     ...mapGetters(["isSketcher"]),
     ...mapState({
       users: "users",
+      connectFailureError: "connectFailureError",
       connectionLost: "connectionList",
       guessWord: "guessWord",
       chatEntries: "chatEntries",

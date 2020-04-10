@@ -1,5 +1,6 @@
 import {
   CompleteSketchingMessage,
+  MessageError,
   MessageType,
   NewUserMessage,
   NextPathMessage,
@@ -19,10 +20,14 @@ import Action, {
   CompleteSketchingPayload,
   ConnectPayload
 } from "@/store/actions";
-import Mutation, { ConnectionPendingPayload } from "@/store/mutations";
+import Mutation, {
+  ConnectionPendingPayload,
+  ConnectFailedPayload
+} from "@/store/mutations";
 
 export interface State {
   isConnected: boolean;
+  connectFailureError: MessageError | null;
   /**
    * The value indicating whether this client was already connected and lost the connection.
    *
@@ -50,6 +55,7 @@ export default new Vuex.Store<State>({
   plugins: [createBackendPlugin(config.apiAddress())],
   state: {
     isConnected: false,
+    connectFailureError: null,
     connectionLost: false,
     connectRequestData: null,
     roomId: null,
@@ -77,6 +83,10 @@ export default new Vuex.Store<State>({
 
     [Mutation.ConnectPending](state, payload: ConnectionPendingPayload) {
       state.connectRequestData = { ...payload };
+    },
+
+    [Mutation.ConnectFailed](state, payload: ConnectFailedPayload) {
+      state.connectFailureError = payload.error;
     },
 
     [Mutation.RoomEntered](state, payload: RoomEnteredMessage) {
@@ -128,7 +138,6 @@ export default new Vuex.Store<State>({
     },
 
     [Mutation.SketchingCompleted](state, payload: CompleteSketchingMessage) {
-      console.warn("done");
       if (payload.rightGuessByNickname === null) {
         state.chatEntries = [
           ...state.chatEntries,
