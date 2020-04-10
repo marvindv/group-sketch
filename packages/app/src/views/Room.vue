@@ -16,8 +16,18 @@
             :can-select="isSketcher"
             @user-selected="onUserSelected"
           />
-          <div v-if="isSketcher" class="text-info mt-3">
+          <div v-if="isSketcher" class="text-info mt-3 text-center">
             Klicke auf den TeilnehmerInn, der/die den Begriff erraten hat.
+
+            <small class="d-block my-2 text-muted">oder</small>
+
+            <button
+              type="button"
+              class="btn btn-danger d-block m-auto"
+              @click="onGiveUp"
+            >
+              Aufgeben
+            </button>
           </div>
         </div>
 
@@ -108,6 +118,13 @@ export default class Room extends Vue {
     });
   }
 
+  onGiveUp() {
+    this.backend?.send({
+      type: MessageType.CompleteSketching,
+      rightGuessByNickname: null,
+    });
+  }
+
   onClearClick() {
     this.sketchPad!.clear();
   }
@@ -162,13 +179,20 @@ export default class Room extends Vue {
             ];
             break;
           case MessageType.CompleteSketching:
-            this.chatEntries = [
-              ...this.chatEntries,
-              '"' +
-                message.guessWord +
-                '" richtig geraten von: ' +
-                message.rightGuessByNickname,
-            ];
+            if (message.rightGuessByNickname === null) {
+              this.chatEntries = [
+                ...this.chatEntries,
+                `Keiner hat "${message.guessWord}" erraten.`,
+              ];
+            } else {
+              this.chatEntries = [
+                ...this.chatEntries,
+                '"' +
+                  message.guessWord +
+                  '" richtig geraten von: ' +
+                  message.rightGuessByNickname,
+              ];
+            }
             break;
         }
       });
