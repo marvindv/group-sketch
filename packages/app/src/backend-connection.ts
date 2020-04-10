@@ -6,7 +6,7 @@ import {
   prepareMessage,
   Message,
   MessageError,
-  NextSketcherMessage
+  NextSketcherMessage,
 } from "@group-sketch/shared";
 
 import User from "./models/user";
@@ -28,13 +28,17 @@ export default class BackendConnection {
   }
 
   get users$() {
-    return this.usersSubject.asObservable();
+    return this.usersSubject.pipe(
+      map((users) =>
+        users.sort((u1, u2) => u2.correctGuesses - u1.correctGuesses)
+      )
+    );
   }
 
   get thisUser$(): Observable<User | null> {
     return this.users$.pipe(
-      map(users => {
-        const index = users.findIndex(u => u.thatsYou);
+      map((users) => {
+        const index = users.findIndex((u) => u.thatsYou);
         if (index === -1) {
           return null;
         }
@@ -49,7 +53,7 @@ export default class BackendConnection {
   }
 
   get isSketcher$() {
-    return this.thisUser$.pipe(map(user => (user ? user.isSketcher : false)));
+    return this.thisUser$.pipe(map((user) => (user ? user.isSketcher : false)));
   }
 
   get sketcherChanged$() {
@@ -70,7 +74,7 @@ export default class BackendConnection {
         this.connectedSubject.next(true);
       });
 
-      this.ws.addEventListener("close", event => {
+      this.ws.addEventListener("close", (event) => {
         console.warn(
           "Connection closed:",
           event.code + ":",
@@ -86,7 +90,7 @@ export default class BackendConnection {
         }
       });
 
-      this.ws.addEventListener("error", err => {
+      this.ws.addEventListener("error", (err) => {
         console.error("Socket error:", err, "Retry in 3 seconds.");
         this.ws!.close();
         this.ws = undefined;
@@ -95,18 +99,24 @@ export default class BackendConnection {
         }, 3000);
       });
 
-      this.ws.addEventListener("message", event => {
+      this.ws.addEventListener("message", (event) => {
         const message = extractMessage(event.data);
 
         switch (message.type) {
           case MessageType.RoomEntered:
             this.usersSubject.next([
-              { nickname, isSketcher: false, thatsYou: true },
-              ...message.nicknames.map(n => ({
+              {
+                nickname,
+                isSketcher: false,
+                thatsYou: true,
+                correctGuesses: 0,
+              },
+              ...message.nicknames.map((n) => ({
                 isSketcher: n === message.currentSketcher,
                 nickname: n,
-                thatsYou: false
-              }))
+                thatsYou: false,
+                correctGuesses: 0,
+              })),
             ]);
             if (!resolved) {
               resolved = true;
@@ -121,8 +131,9 @@ export default class BackendConnection {
               {
                 isSketcher: false,
                 nickname: message.nickname,
-                thatsYou: false
-              }
+                thatsYou: false,
+                correctGuesses: 0,
+              },
             ]);
             break;
           }
@@ -130,7 +141,7 @@ export default class BackendConnection {
           case MessageType.UserLeft: {
             const currentUsers = this.usersSubject.getValue();
             this.usersSubject.next(
-              currentUsers.filter(u => u.nickname !== message.nickname)
+              currentUsers.filter((u) => u.nickname !== message.nickname)
             );
             break;
           }
@@ -138,9 +149,9 @@ export default class BackendConnection {
           case MessageType.NextSketcher: {
             const currentUsers = this.usersSubject.getValue();
             this.usersSubject.next(
-              currentUsers.map(u => ({
+              currentUsers.map((u) => ({
                 ...u,
-                isSketcher: u.nickname === message.nickname
+                isSketcher: u.nickname === message.nickname,
               }))
             );
 
@@ -154,6 +165,22 @@ export default class BackendConnection {
             this.sketcherChangedSubject.next(message);
 
             break;
+          }
+
+          case MessageType.CompleteSketching: {
+            const currentUsers = this.usersSubject.getValue();
+
+            if (message.rightGuessByNickname !== null) {
+              this.usersSubject.next(
+                currentUsers.map((u) => ({
+                  ...u,
+                  correctGuesses:
+                    message.rightGuessByNickname === u.nickname
+                      ? u.correctGuesses + 1
+                      : u.correctGuesses,
+                }))
+              );
+            }
           }
         }
 

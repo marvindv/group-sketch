@@ -7,14 +7,14 @@
           :key="user.nickname"
           class="list-group-item active"
         >
-          {{ user.nickname }}
+          {{ user.nickname }} ({{ user.correctGuesses }})
         </li>
         <li
           v-if="!user.isSketcher && !canSelect"
           :key="user.nickname"
           class="list-group-item"
         >
-          {{ user.nickname }}
+          {{ user.nickname }} ({{ user.correctGuesses }})
         </li>
         <button
           v-if="!user.isSketcher && canSelect"
@@ -23,7 +23,7 @@
           class="list-group-item list-group-item-action"
           @click="onSelectUser(user)"
         >
-          {{ user.nickname }}
+          {{ user.nickname }} ({{ user.correctGuesses }})
         </button>
       </template>
     </ul>
