@@ -10,10 +10,7 @@ import {
 import { Store } from "vuex";
 
 import { State } from "@/store";
-import Mutation, {
-  ConnectionPendingPayload,
-  ConnectFailedPayload
-} from "@/store/mutations";
+import Mutation, { ConnectionPendingPayload } from "@/store/mutations";
 
 /**
  * Encapsulated the websocket connection to the backend. Transmits data using the connection on

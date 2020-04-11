@@ -5,9 +5,10 @@ import Path from "./path";
  * See https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent
  */
 export declare enum MessageError {
-    RoomNotFound = 4000,
-    NicknameInUse = 4001,
-    Other = 4002
+    InvalidPayload = 4000,
+    RoomNotFound = 4001,
+    NicknameInUse = 4002,
+    Other = 4003
 }
 export declare enum MessageType {
     EnterRoom = 0,

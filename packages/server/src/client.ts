@@ -18,6 +18,7 @@ enum ClientState {
   Guesser,
   Sketcher
 }
+
 export default class Client {
   private state: ClientState = ClientState.AwaitRoom;
   private room: Room | undefined;
@@ -73,7 +74,16 @@ export default class Client {
     this.ws.send(prepareMessage(message));
   }
 
-  private handleEnterRoom(message: EnterRoomMessage) {
+  /**
+   * The client can enter a room with a nickname and a room id. The client must be in the AwaitRoom
+   * state. The room must already exist and the nickname must not be in use already in that room.
+   *
+   * @private
+   * @param {Partial<EnterRoomMessage>} message
+   * @returns
+   * @memberof Client
+   */
+  private handleEnterRoom(message: Partial<EnterRoomMessage>) {
     if (this.state !== ClientState.AwaitRoom) {
       console.error(
         "Received EnterRoom from client in state",
@@ -82,6 +92,17 @@ export default class Client {
       return;
     }
 
+    // Validate the payload.
+    if (
+      typeof message.roomId !== "string" ||
+      typeof message.nickname !== "string"
+    ) {
+      console.error("User tried to access room with invalid payload", message);
+      this.ws.close(MessageError.InvalidPayload);
+      return;
+    }
+
+    // Find the room and add the user if there is no nickname conflict.
     this.state = ClientState.Guesser;
     const room = Room.getById(message.roomId);
     if (!room) {
@@ -107,7 +128,15 @@ export default class Client {
     this.room.addClient(this);
   }
 
-  private handleNextPath(message: NextPathMessage) {
+  /**
+   * The client sent a new sketch path. The client must be in the Sketcher state.
+   *
+   * @private
+   * @param {Partial<NextPathMessage>} message
+   * @returns
+   * @memberof Client
+   */
+  private handleNextPath(message: Partial<NextPathMessage>) {
     if (this.state !== ClientState.Sketcher) {
       console.error(
         "Received NextPath from client in state",
@@ -116,9 +145,30 @@ export default class Client {
       return;
     }
 
+    // Validate the payload.
+    if (
+      !Array.isArray(message.nextPath) ||
+      // Each point must be a 2-tuple.
+      message.nextPath.some(path => !Array.isArray(path) || path.length !== 2)
+    ) {
+      console.error(
+        "User tries to submit next path with invalid payload.",
+        message
+      );
+      return;
+    }
+
     this.room?.broadcastPath(this, message.nextPath);
   }
 
+  /**
+   * Not yet implemented.
+   *
+   * @private
+   * @param {TextMessage} message
+   * @returns
+   * @memberof Client
+   */
   private handleText(message: TextMessage) {
     if (this.state !== ClientState.Guesser) {
       console.error(
@@ -129,11 +179,31 @@ export default class Client {
     }
   }
 
+  /**
+   * Handle the completion of a sketching. The client must be in the Sketcher state.
+   *
+   * @private
+   * @param {CompleteSketchingMessage} message
+   * @returns
+   * @memberof Client
+   */
   private handleCompleteSketching(message: CompleteSketchingMessage) {
     if (this.state !== ClientState.Sketcher) {
       console.error(
         "Received CompleteSketching from client in state",
         ClientState[this.state]
+      );
+      return;
+    }
+
+    // Validate the payload.
+    if (
+      message.rightGuessByNickname !== null &&
+      typeof message.rightGuessByNickname !== "string"
+    ) {
+      console.error(
+        "User tried to complete sketching with invalid payload.",
+        message
       );
       return;
     }

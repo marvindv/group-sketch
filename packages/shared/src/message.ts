@@ -6,7 +6,8 @@ import Path from "./path";
  * See https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent
  */
 export enum MessageError {
-  RoomNotFound = 4000,
+  InvalidPayload = 4000,
+  RoomNotFound,
   NicknameInUse,
   Other
 }

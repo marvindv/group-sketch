@@ -7,9 +7,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
  */
 var MessageError;
 (function (MessageError) {
-    MessageError[MessageError["RoomNotFound"] = 4000] = "RoomNotFound";
-    MessageError[MessageError["NicknameInUse"] = 4001] = "NicknameInUse";
-    MessageError[MessageError["Other"] = 4002] = "Other";
+    MessageError[MessageError["InvalidPayload"] = 4000] = "InvalidPayload";
+    MessageError[MessageError["RoomNotFound"] = 4001] = "RoomNotFound";
+    MessageError[MessageError["NicknameInUse"] = 4002] = "NicknameInUse";
+    MessageError[MessageError["Other"] = 4003] = "Other";
 })(MessageError = exports.MessageError || (exports.MessageError = {}));
 var MessageType;
 (function (MessageType) {
