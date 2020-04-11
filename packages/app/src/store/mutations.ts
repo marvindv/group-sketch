@@ -2,6 +2,19 @@ import { MessageError } from "@group-sketch/shared";
 
 export enum Mutation {
   /**
+   * Updates the join room form data.
+   *
+   * Payload:
+   * ```
+   * {
+   *   roomId: string | null;
+   *   nickname: string | null;
+   * }
+   * ```
+   */
+  UpdateJoinRoomForm = "UPDATE_JOIN_ROOM_FORM",
+
+  /**
    * Changes the `isConnected` state.
    *
    * Payload:

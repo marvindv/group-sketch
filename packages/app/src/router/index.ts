@@ -1,12 +1,18 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
 import Room from "../views/Room.vue";
+import Home from "../views/Home.vue";
 
 Vue.use(VueRouter);
 
 const routes = [
   {
-    path: "/room/:nickname/:id",
+    path: "/",
+    name: "Home",
+    component: Home
+  },
+  {
+    path: "/r/:id",
     props: true,
     name: "Room",
     component: Room

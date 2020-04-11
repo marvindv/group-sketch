@@ -8,3 +8,10 @@ body {
   background-attachment: fixed;
   background-repeat: repeat;
 }
+
+button.card-footer-btn {
+  border-radius: 0 0 $card-inner-border-radius $card-inner-border-radius;
+  padding: $card-spacer-y $card-spacer-x;
+  margin: 0 (-$card-border-width) (-$card-border-width) (-$card-border-width);
+  border-color: darken(theme-color("primary"), 10%);
+}

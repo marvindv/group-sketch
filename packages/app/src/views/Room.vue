@@ -80,6 +80,7 @@ import Chat from "@/components/Chat.vue";
 import User from "../models/user";
 import Action from "../store/actions";
 import Mutation from "../store/mutations";
+import { State } from "../store";
 
 export default Vue.extend({
   components: {
@@ -88,8 +89,7 @@ export default Vue.extend({
     UserList
   },
   props: {
-    id: { type: String },
-    nickname: { type: String }
+    id: { type: String }
   },
   data() {
     return {
@@ -104,7 +104,8 @@ export default Vue.extend({
       }
     },
     ...mapGetters(["isSketcher"]),
-    ...mapState({
+    ...mapState<State>({
+      nickname: state => state.joinRoomForm.nickname,
       users: "users",
       connectFailureError: "connectFailureError",
       connectionLost: "connectionList",
@@ -112,6 +113,12 @@ export default Vue.extend({
       chatEntries: "chatEntries",
       sketchPaths: "sketchPaths"
     })
+  },
+  beforeMount() {
+    // Make sure, a nickname is available.
+    if (typeof this.nickname !== "string") {
+      this.$router.push({ name: "Home" });
+    }
   },
   mounted() {
     this.$store.dispatch(Action.Connect, {

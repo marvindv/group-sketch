@@ -26,6 +26,13 @@ import Mutation, {
 } from "@/store/mutations";
 
 export interface State {
+  // Home view state:
+  joinRoomForm: {
+    roomId: string | null;
+    nickname: string | null;
+  };
+
+  // Room state:
   isConnected: boolean;
   connectFailureError: MessageError | null;
   /**
@@ -54,6 +61,11 @@ export default new Vuex.Store<State>({
   strict: debug,
   plugins: [createBackendPlugin(config.apiAddress())],
   state: {
+    joinRoomForm: {
+      roomId: null,
+      nickname: null
+    },
+
     isConnected: false,
     connectFailureError: null,
     connectionLost: false,
@@ -76,6 +88,13 @@ export default new Vuex.Store<State>({
     isSketcher: (_, getters) => getters.thisUser?.isSketcher || false
   },
   mutations: {
+    [Mutation.UpdateJoinRoomForm](
+      state,
+      payload: { roomId: string | null; nickname: string | null }
+    ) {
+      state.joinRoomForm = { ...payload };
+    },
+
     [Mutation.ChangeConnectionState](state, payload: { isConnected: boolean }) {
       state.connectionLost = !payload.isConnected && state.isConnected;
       state.isConnected = payload.isConnected;
