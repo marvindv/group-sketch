@@ -1,0 +1,10 @@
+@import "~bootstrap";
+@import "~bootstrap-vue";
+
+body {
+  // Background pattern from Toptal Subtle Patterns
+  // https://www.toptal.com/designers/subtlepatterns/light-sketch/
+  background-image: url(images/furley_bg.png);
+  background-attachment: fixed;
+  background-repeat: repeat;
+}

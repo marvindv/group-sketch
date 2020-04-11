@@ -1,7 +1,7 @@
 import Vue from "vue";
 import { BootstrapVue } from "bootstrap-vue";
 
-import "./custom.scss";
+import "./style.scss";
 
 import App from "./App.vue";
 import router from "./router";
