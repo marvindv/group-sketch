@@ -80,7 +80,6 @@ import Chat from "@/components/Chat.vue";
 import User from "../models/user";
 import Action from "../store/actions";
 import Mutation from "../store/mutations";
-import { State } from "../store";
 
 export default Vue.extend({
   components: {
@@ -104,8 +103,8 @@ export default Vue.extend({
       }
     },
     ...mapGetters(["isSketcher"]),
-    ...mapState<State>({
-      nickname: state => state.joinRoomForm.nickname,
+    ...mapState({
+      nickname: "joinRoomForm.nickname",
       users: "users",
       connectFailureError: "connectFailureError",
       connectionLost: "connectionList",
@@ -115,7 +114,7 @@ export default Vue.extend({
     })
   },
   beforeMount() {
-    // Make sure, a nickname is available.
+    // Make sure a nickname is available.
     if (typeof this.nickname !== "string") {
       this.$router.push({ name: "Home" });
     }
