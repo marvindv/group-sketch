@@ -9,16 +9,15 @@
         </div>
 
         <div class="card-body">
-          <div v-if="connectFailureError !== null" class="mb-4">
-            <div
+          <div v-if="connectFailureError !== null">
+            <template
               v-if="connectFailureError === MessageError.RoomNotFound"
-              class="alert alert-danger text-left"
-            >
-              <strong class="d-block">Raum nicht gefunden 😔</strong> Überprüfe
-              den Namen oder erstelle einen neuen Raum.
-            </div>
+            ></template>
+            <template
+              v-else-if="connectFailureError === MessageError.NicknameInUse"
+            ></template>
 
-            <div v-else class="alert alert-danger text-left">
+            <div v-else class="alert alert-danger text-left mb-4">
               <strong class="d-block">Es ist ein Fehler aufgetreten 😔</strong>
               Bitte versuche es spaeter noch einmal.
 
@@ -34,30 +33,52 @@
               <input
                 id="room-id-input"
                 type="text"
-                class="form-control"
+                :class="[
+                  'form-control',
+                  connectFailureError === MessageError.RoomNotFound
+                    ? 'is-invalid'
+                    : ''
+                ]"
                 required
                 v-model="roomId"
                 :disabled="isConnecting"
                 @keyup.enter="onLoginClick"
               />
-              <label class="form-control-placeholder" for="room-id-input"
-                >Name des Raums</label
+              <label class="form-control-placeholder" for="room-id-input">
+                Name des Raums
+              </label>
+              <div
+                v-if="connectFailureError === MessageError.RoomNotFound"
+                class="invalid-feedback"
               >
+                Dieser Raum existiert nicht.
+              </div>
             </div>
 
             <div class="form-group floating-labels">
               <input
                 id="nickname-input"
                 type="text"
-                class="form-control"
+                :class="[
+                  'form-control',
+                  connectFailureError === MessageError.NicknameInUse
+                    ? 'is-invalid'
+                    : ''
+                ]"
                 required
                 v-model="nickname"
                 :disabled="isConnecting"
                 @keyup.enter="onLoginClick"
               />
-              <label class="form-control-placeholder" for="nickname-input"
-                >Dein Nickname</label
+              <label class="form-control-placeholder" for="nickname-input">
+                Dein Nickname
+              </label>
+              <div
+                v-if="connectFailureError === MessageError.NicknameInUse"
+                class="invalid-feedback"
               >
+                Der Nickname ist leider schon vergeben.
+              </div>
             </div>
           </form>
         </div>
@@ -68,7 +89,7 @@
           :disabled="isConnecting"
           @click="onLoginClick"
         >
-          Los gehts!
+          🚀 Los gehts!
         </button>
       </div>
 
@@ -164,9 +185,5 @@ export default Vue.extend({
   max-width: 240px;
   margin: auto;
   @include card(1);
-}
-
-.form-group:last-child {
-  margin-bottom: 0;
 }
 </style>
