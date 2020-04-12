@@ -39,7 +39,7 @@
                     ? 'is-invalid'
                     : ''
                 ]"
-                required
+                placeholder=" "
                 v-model="roomId"
                 :disabled="isConnecting"
                 @keyup.enter="onLoginClick"
@@ -65,7 +65,7 @@
                     ? 'is-invalid'
                     : ''
                 ]"
-                required
+                placeholder=" "
                 v-model="nickname"
                 :disabled="isConnecting"
                 @keyup.enter="onLoginClick"

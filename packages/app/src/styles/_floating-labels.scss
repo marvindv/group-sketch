@@ -1,5 +1,13 @@
 // Adapted from https://codepen.io/peiche/pen/xOVpPo
 
+//
+// Note!
+// =====
+// Each folding label input must have a placeholder, at least one with a single whitespace like:
+//
+//   <input placeholder=" ">
+//
+
 $floating-label-font-size: 0.75 * $font-size-base;
 $floating-label-line-height: $line-height-base * $floating-label-font-size;
 
@@ -7,6 +15,11 @@ $floating-label-line-height: $line-height-base * $floating-label-font-size;
   position: relative;
   margin-bottom: 1.5rem;
   text-align: left;
+
+  .form-control::placeholder {
+    opacity: 0;
+    transition: $transition-base;
+  }
 }
 
 .form-group.floating-labels:first-child {
@@ -27,11 +40,21 @@ $floating-label-line-height: $line-height-base * $floating-label-font-size;
   color: $input-placeholder-color;
 }
 
-.form-control:focus + .form-control-placeholder,
-.form-control:valid + .form-control-placeholder {
-  font-size: $floating-label-font-size;
-  transform: translate3d(0, -100%, 0);
-  padding-left: 0;
-  opacity: 1;
-  color: inherit;
+.form-control:focus,
+// Use :placeholder-shown (instead of say :valid in combination with the [required] attribute so the
+// labels stay afloat even though the input is disabled.
+.form-control:not(:placeholder-shown),
+// The .float class can be added to the .form-control to force the floating style.
+.form-control.float {
+  & + .form-control-placeholder {
+    font-size: $floating-label-font-size;
+    transform: translate3d(0, -100%, 0);
+    padding-left: 0;
+    opacity: 1;
+    color: inherit;
+  }
+
+  &::placeholder {
+    opacity: 1 !important;
+  }
 }
