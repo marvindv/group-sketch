@@ -8,8 +8,6 @@
       @touchstart="onTouchStart"
       @touchmove="onTouchMove"
       @touchend="onTouchEnd"
-      width="500"
-      height="500"
     ></canvas>
   </div>
 </template>
@@ -28,6 +26,13 @@ export default class SketchPad extends Vue {
 
   @Prop({ type: Boolean, required: true }) readonly enabled!: boolean;
 
+  private clientWidth = 0;
+
+  /**
+   * The scaling from the base width of 500 on which the backend operates.
+   */
+  private scalingFactor = 0;
+
   private ctx: CanvasRenderingContext2D | null = null;
 
   private prevX: number | null = null;
@@ -35,6 +40,12 @@ export default class SketchPad extends Vue {
   private currentPath: Path = [];
 
   mounted() {
+    this.clientWidth = this.canvas.clientWidth;
+    this.canvas.height = this.clientWidth;
+    this.canvas.width = this.clientWidth;
+
+    this.scalingFactor = this.clientWidth / 500;
+
     this.ctx = this.canvas.getContext("2d");
     this.drawBorder();
   }
@@ -91,7 +102,13 @@ export default class SketchPad extends Vue {
 
   @Emit("next-path")
   emitNextPath() {
-    return this.currentPath;
+    // As soon as the drawn path leaves this component, we have to transform the local points to the
+    // normalized coordination system of the backend.
+    const scaled = this.currentPath.map(p => [
+      p[0] / this.scalingFactor,
+      p[1] / this.scalingFactor
+    ]);
+    return scaled;
   }
 
   /**
@@ -99,7 +116,7 @@ export default class SketchPad extends Vue {
    */
   clear() {
     if (this.ctx) {
-      this.ctx.clearRect(0, 0, 500, 500);
+      this.ctx.clearRect(0, 0, this.clientWidth, this.clientWidth);
       this.drawBorder();
     }
   }
@@ -125,8 +142,13 @@ export default class SketchPad extends Vue {
           continue;
         }
 
-        this.ctx.moveTo(prevPoint[0], prevPoint[1]);
-        this.ctx.lineTo(p[0], p[1]);
+        // Transform the normalized points of the backend coordinate system into the local
+        // coordinate system.
+        this.ctx.moveTo(
+          prevPoint[0] * this.scalingFactor,
+          prevPoint[1] * this.scalingFactor
+        );
+        this.ctx.lineTo(p[0] * this.scalingFactor, p[1] * this.scalingFactor);
 
         prevPoint = p;
       }
@@ -194,9 +216,9 @@ export default class SketchPad extends Vue {
     this.ctx.lineWidth = 2;
     this.ctx.strokeStyle = "rgba(0, 0, 0, 0.125)";
     this.ctx.moveTo(0, 0);
-    this.ctx.lineTo(500, 0);
-    this.ctx.lineTo(500, 500);
-    this.ctx.lineTo(0, 500);
+    this.ctx.lineTo(this.clientWidth, 0);
+    this.ctx.lineTo(this.clientWidth, this.clientWidth);
+    this.ctx.lineTo(0, this.clientWidth);
     this.ctx.lineTo(0, 0);
     this.ctx.stroke();
     this.ctx.closePath();
@@ -212,4 +234,14 @@ export default class SketchPad extends Vue {
 }
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+@import "src/styles/helper/shadow";
+
+canvas {
+  width: 100%;
+  max-width: 100%;
+  background: white;
+
+  @include card(3);
+}
+</style>
