@@ -1,9 +1,20 @@
 // Adapted from https://codepen.io/peiche/pen/xOVpPo
 
+$floating-label-font-size: 0.75 * $font-size-base;
+$floating-label-line-height: $line-height-base * $floating-label-font-size;
+
 .form-group.floating-labels {
   position: relative;
   margin-bottom: 1.5rem;
   text-align: left;
+}
+
+.form-group.floating-labels:first-child {
+  margin-top: $floating-label-line-height / 2;
+}
+
+.form-group.floating-labels:last-child {
+  margin-bottom: $floating-label-line-height / 2;
 }
 
 .form-control-placeholder {
@@ -12,13 +23,13 @@
   padding: calc(#{$input-btn-padding-y} + #{$input-btn-border-width}) 0 0
     calc(#{$input-btn-padding-x} + #{$input-btn-border-width});
 
-  transition: all 200ms;
+  transition: $transition-base;
   color: $input-placeholder-color;
 }
 
 .form-control:focus + .form-control-placeholder,
 .form-control:valid + .form-control-placeholder {
-  font-size: 75%;
+  font-size: $floating-label-font-size;
   transform: translate3d(0, -100%, 0);
   padding-left: 0;
   opacity: 1;
