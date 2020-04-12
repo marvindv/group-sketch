@@ -49,6 +49,11 @@ export enum Mutation {
   RoomEntered = "ROOM_ENTERED",
 
   /**
+   * The connection to the current room was closed.
+   */
+  RoomLeft = "ROOM_LEFT",
+
+  /**
    * Adds a new user to the state.
    *
    * Payload: {@link NewUserMessage}

@@ -140,6 +140,9 @@ export default Vue.extend({
       }
     });
   },
+  destroyed() {
+    this.$store.dispatch(Action.Disconnect);
+  },
   methods: {
     onNextPath(path: Path) {
       this.$store.dispatch(Action.AddPath, { path });

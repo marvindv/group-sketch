@@ -135,6 +135,14 @@ export default new Vuex.Store<State>({
       state.chatEntries = [...state.chatEntries, "Willkommen"];
     },
 
+    [Mutation.RoomLeft](state) {
+      state.chatEntries = [];
+      state.guessWord = null;
+      state.roomId = null;
+      state.sketchPaths = [];
+      state.users = [];
+    },
+
     [Mutation.NewUser](state, payload: NewUserMessage) {
       state.users = [
         ...state.users,
@@ -200,6 +208,11 @@ export default new Vuex.Store<State>({
   actions: {
     [Action.Connect](context, payload: ConnectPayload) {
       context.commit(Mutation.ConnectPending, payload);
+    },
+
+    [Action.Disconnect]() {
+      // Nothing to do here. The websocket backend plugin will do the whole job.
+      return;
     },
 
     [Action.AddPath](context, payload: AddPathPayload) {

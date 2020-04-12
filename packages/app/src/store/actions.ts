@@ -9,6 +9,11 @@ export enum Action {
   Connect = "CONNECT",
 
   /**
+   * Disconnects from the backend.
+   */
+  Disconnect = "DISCONNECT",
+
+  /**
    * Submits a new drawn path.
    *
    * Payload: {@link AddPathPayload}

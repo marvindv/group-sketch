@@ -10,6 +10,7 @@ import {
 import { Store } from "vuex";
 
 import { State } from "@/store";
+import Action from "@/store/actions";
 import Mutation, { ConnectionPendingPayload } from "@/store/mutations";
 
 /**
@@ -29,6 +30,15 @@ export default function createBackendPlugin(apiAddress: string) {
   }
 
   return (store: Store<State>) => {
+    store.subscribeAction((action, state) => {
+      switch (action.type) {
+        case Action.Disconnect: {
+          ws?.close(MessageError.NormalClosure);
+          break;
+        }
+      }
+    });
+
     store.subscribe(mutation => {
       switch (mutation.type) {
         case Mutation.ConnectPending: {
@@ -45,13 +55,20 @@ export default function createBackendPlugin(apiAddress: string) {
           });
 
           ws.addEventListener("close", event => {
-            console.error(
-              `Connection closed: ${event.code}: ${MessageError[event.code]}`,
-              event
-            );
-            store.commit(Mutation.ConnectFailed, {
-              error: event.code
+            if (event.code !== MessageError.NormalClosure) {
+              console.error(
+                `Connection closed: ${event.code}: ${MessageError[event.code]}`,
+                event
+              );
+              store.commit(Mutation.ConnectFailed, {
+                error: event.code
+              });
+            }
+
+            store.commit(Mutation.ChangeConnectionState, {
+              isConnected: false
             });
+            store.commit(Mutation.RoomLeft);
           });
 
           ws.addEventListener("error", err => {

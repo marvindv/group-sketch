@@ -1,12 +1,18 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /**
- * The possible error resonse codes used for handling messages. Since the error code is passed to
- * websocket.close it must start be between 4000 and 4999.
+ * The possible error codes given as reasons for closed websocket connections.
+ *
+ * Custom error codes are allowed to be in the range between 4000 and 4999.
+ *
  * See https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent
  */
 var MessageError;
 (function (MessageError) {
+    /**
+     * The error code indicating that there was actually no error. Is used when leaving a room.
+     */
+    MessageError[MessageError["NormalClosure"] = 1000] = "NormalClosure";
     MessageError[MessageError["InvalidPayload"] = 4000] = "InvalidPayload";
     MessageError[MessageError["RoomNotFound"] = 4001] = "RoomNotFound";
     MessageError[MessageError["NicknameInUse"] = 4002] = "NicknameInUse";
