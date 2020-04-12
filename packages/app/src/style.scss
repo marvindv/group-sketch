@@ -1,6 +1,8 @@
 @import "~bootstrap";
 @import "~bootstrap-vue";
 
+@import "./styles/floating-labels";
+
 body {
   // Background pattern from Toptal Subtle Patterns
   // https://www.toptal.com/designers/subtlepatterns/light-sketch/
@@ -9,9 +11,12 @@ body {
   background-repeat: repeat;
 }
 
-button.card-footer-btn {
+.btn.card-footer-btn {
   border-radius: 0 0 $card-inner-border-radius $card-inner-border-radius;
   padding: $card-spacer-y $card-spacer-x;
   margin: 0 (-$card-border-width) (-$card-border-width) (-$card-border-width);
+}
+
+.btn.btn-primary.card-footer-btn {
   border-color: darken(theme-color("primary"), 10%);
 }

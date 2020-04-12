@@ -102,9 +102,14 @@ export default Vue.extend({
         return this.$refs.sketchPad as SketchPad;
       }
     },
+    nickname: {
+      get(): string {
+        return this.$store.state.joinRoomForm.nickname;
+      }
+    },
     ...mapGetters(["isSketcher"]),
     ...mapState({
-      nickname: "joinRoomForm.nickname",
+      isConnected: "isConnected",
       users: "users",
       connectFailureError: "connectFailureError",
       connectionLost: "connectionList",
@@ -114,17 +119,16 @@ export default Vue.extend({
     })
   },
   beforeMount() {
-    // Make sure a nickname is available.
-    if (typeof this.nickname !== "string") {
+    // Make sure we are already connected.
+    if (!this.isConnected) {
+      this.$store.commit(Mutation.UpdateJoinRoomForm, {
+        roomId: this.id,
+        nickname: null
+      });
       this.$router.push({ name: "Home" });
     }
   },
   mounted() {
-    this.$store.dispatch(Action.Connect, {
-      nickname: this.nickname,
-      roomId: this.id
-    });
-
     this.$store.subscribe(mutation => {
       if (mutation.type === Mutation.NextPath) {
         const payload = mutation.payload as NextPathMessage;
