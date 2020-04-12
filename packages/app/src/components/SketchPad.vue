@@ -14,6 +14,7 @@
 
 <script lang="ts">
 import { Component, Vue, Ref, Emit, Prop } from "vue-property-decorator";
+import ResizeObserver from "resize-observer-polyfill";
 
 import { Path, Point } from "@group-sketch/shared";
 
@@ -26,7 +27,13 @@ export default class SketchPad extends Vue {
 
   @Prop({ type: Boolean, required: true }) readonly enabled!: boolean;
 
+  private resizeObserver: ResizeObserver | undefined;
   private clientWidth = 0;
+
+  /**
+   * Contains all paths currently drawn in this canvas in normalized backend coordinates.
+   */
+  private canvasContent: Path[] = [];
 
   /**
    * The scaling from the base width of 500 on which the backend operates.
@@ -40,14 +47,27 @@ export default class SketchPad extends Vue {
   private currentPath: Path = [];
 
   mounted() {
-    this.clientWidth = this.canvas.clientWidth;
-    this.canvas.height = this.clientWidth;
-    this.canvas.width = this.clientWidth;
-
-    this.scalingFactor = this.clientWidth / 500;
-
     this.ctx = this.canvas.getContext("2d");
-    this.drawBorder();
+
+    this.resizeObserver = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        const { width } = entry.contentRect;
+
+        this.clientWidth = width;
+        this.canvas.height = this.clientWidth;
+        this.canvas.width = this.clientWidth;
+
+        this.scalingFactor = this.clientWidth / 500;
+        this.drawBorder();
+        this.drawPaths(this.canvasContent);
+      }
+    });
+
+    this.resizeObserver.observe(this.canvas);
+  }
+
+  destroyed() {
+    this.resizeObserver?.disconnect();
   }
 
   /**
@@ -104,10 +124,10 @@ export default class SketchPad extends Vue {
   emitNextPath() {
     // As soon as the drawn path leaves this component, we have to transform the local points to the
     // normalized coordination system of the backend.
-    const scaled = this.currentPath.map(p => [
-      p[0] / this.scalingFactor,
-      p[1] / this.scalingFactor
-    ]);
+    const scaled = this.currentPath.map(
+      p => [p[0] / this.scalingFactor, p[1] / this.scalingFactor] as Point
+    );
+    this.canvasContent.push(scaled);
     return scaled;
   }
 
@@ -115,6 +135,8 @@ export default class SketchPad extends Vue {
    * Clears the underlying canvas, removing all paths drawn on it.
    */
   clear() {
+    this.canvasContent = [];
+
     if (this.ctx) {
       this.ctx.clearRect(0, 0, this.clientWidth, this.clientWidth);
       this.drawBorder();
@@ -128,6 +150,8 @@ export default class SketchPad extends Vue {
     if (!this.ctx) {
       return;
     }
+
+    this.canvasContent.push(...paths);
 
     for (const path of paths) {
       this.ctx.beginPath();
