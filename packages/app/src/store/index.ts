@@ -98,6 +98,7 @@ export default new Vuex.Store<State>({
       payload: { roomId: string | null; nickname: string | null }
     ) {
       state.joinRoomForm = { ...payload };
+      state.connectFailureError = null;
     },
 
     [Mutation.ChangeConnectionState](state, payload: { isConnected: boolean }) {
