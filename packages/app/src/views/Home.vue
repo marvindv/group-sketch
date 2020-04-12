@@ -37,6 +37,7 @@
                 class="form-control"
                 required
                 v-model="roomId"
+                :disabled="isConnecting"
                 @keyup.enter="onLoginClick"
               />
               <label class="form-control-placeholder" for="room-id-input"
@@ -51,6 +52,7 @@
                 class="form-control"
                 required
                 v-model="nickname"
+                :disabled="isConnecting"
                 @keyup.enter="onLoginClick"
               />
               <label class="form-control-placeholder" for="nickname-input"
@@ -63,6 +65,7 @@
         <button
           type="button"
           class="btn btn-primary card-footer-btn"
+          :disabled="isConnecting"
           @click="onLoginClick"
         >
           Los gehts!
@@ -80,11 +83,11 @@
 
 <script lang="ts">
 import Vue from "vue";
+import { mapState, mapGetters } from "vuex";
+import { MessageError } from "@group-sketch/shared";
 
 import Mutation from "../store/mutations";
 import Action from "../store/actions";
-import { mapState } from "vuex";
-import { MessageError } from "@group-sketch/shared";
 
 export default Vue.extend({
   computed: {
@@ -110,7 +113,8 @@ export default Vue.extend({
         });
       }
     },
-    ...mapState(["connectFailureError"])
+    ...mapState(["connectFailureError"]),
+    ...mapGetters(["isConnecting"])
   },
 
   data() {
@@ -148,7 +152,7 @@ export default Vue.extend({
 @import "src/styles/helper/shadow";
 
 .content {
-  max-width: 500px !important;
+  max-width: 400px !important;
   margin: auto;
 }
 

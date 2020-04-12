@@ -78,6 +78,11 @@ export default new Vuex.Store<State>({
   },
   getters: {
     /**
+     * The value indicating whether this client is currently connecting to the backend.
+     */
+    isConnecting: state => state.connectRequestData !== null,
+
+    /**
      * The user object representing this client.
      */
     thisUser: state => state.users.find(u => u.thatsYou),
@@ -106,6 +111,7 @@ export default new Vuex.Store<State>({
 
     [Mutation.ConnectFailed](state, payload: ConnectFailedPayload) {
       state.connectFailureError = payload.error;
+      state.connectRequestData = null;
     },
 
     [Mutation.RoomEntered](state, payload: RoomEnteredMessage) {
