@@ -154,10 +154,13 @@ export default Vue.extend({
         return this.$store.state.joinRoomForm.nickname;
       }
     },
-    ...mapGetters(["isSketcher", "currentSketcher"]),
+    ...mapGetters({
+      isSketcher: "isSketcher",
+      currentSketcher: "currentSketcher",
+      users: "sortedUsers"
+    }),
     ...mapState({
       isConnected: "isConnected",
-      users: "users",
       connectFailureError: "connectFailureError",
       connectionLost: "connectionList",
       guessWord: "guessWord",

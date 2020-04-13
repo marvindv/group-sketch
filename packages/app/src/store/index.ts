@@ -88,6 +88,19 @@ export default new Vuex.Store<State>({
     thisUser: state => state.users.find(u => u.thatsYou),
 
     /**
+     * The list of users sorted from the user with the most to the user with the least correct
+     * guesses. Users with the same number of correct guesses are sorted by their nickname.
+     */
+    sortedUsers: state =>
+      state.users.slice().sort((a, b) => {
+        if (a.correctGuesses === b.correctGuesses) {
+          return a.nickname.localeCompare(b.nickname);
+        }
+
+        return b.correctGuesses - a.correctGuesses;
+      }),
+
+    /**
      * The current sketcher or `undefined` if there is none.
      */
     currentSketcher: state => state.users.find(u => u.isSketcher),
@@ -187,6 +200,16 @@ export default new Vuex.Store<State>({
           ...state.chatEntries,
           `"${payload.guessWord}" richtig geraten von: ${payload.rightGuessByNickname}`
         ];
+        state.users = state.users.map(user => {
+          if (payload.rightGuessByNickname === user.nickname) {
+            return {
+              ...user,
+              correctGuesses: user.correctGuesses + 1
+            };
+          }
+
+          return user;
+        });
       }
     },
 
