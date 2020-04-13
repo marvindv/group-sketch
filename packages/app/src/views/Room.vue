@@ -1,46 +1,24 @@
 <template>
   <div class="container-fluid room">
-    <div v-if="connectFailureError" class="alert alert-danger">
-      <div v-if="connectFailureError === MessageError.NicknameInUse">
-        <strong>Fehler!</strong> Nickname vergeben
-      </div>
-      <div v-else>Fehler {{ connectFailureError }}</div>
-    </div>
     <div v-if="connectionLost" class="alert alert-danger">
       <strong>Verbindung abgebrochen!</strong>&nbsp;
       <a href="javascript:window.location.reload();">Seite neu laden</a>
     </div>
 
-    <div v-if="!connectFailureError">
-      <div class="dashboard row">
-        <div class="col">
-          <h4>
-            <small class="text-muted">Spieler</small>
-          </h4>
-          <UserList
-            v-if="users.length > 0"
-            :users="users"
-            :can-select="isSketcher"
-            @user-selected="onUserSelected"
-          />
-          <div v-if="isSketcher" class="text-info mt-3 text-center">
-            Klicke auf den TeilnehmerInn, der/die den Begriff erraten hat.
-            <small class="d-block my-2 text-muted">oder</small>
-
-            <button
-              type="button"
-              class="btn btn-danger d-block m-auto"
-              @click="onGiveUp"
-            >
-              Aufgeben
-            </button>
+    <div class="dashboard row">
+      <div class="order-md-2 col-md text-center sketchpad-col mb-3">
+        <div class="sketchpad-wrapper">
+          <div v-if="!currentSketcher" class="alert alert-info">
+            Warte auf mehr Spieler &hellip;
           </div>
-        </div>
 
-        <div class="col text-center sketchpad-col">
-          <h4 class="text-center">
-            <small class="text-muted">Magic happens here</small>
-          </h4>
+          <div v-if="currentSketcher && !isSketcher" class="alert alert-info">
+            {{ currentSketcher.nickname }} zeichnet &hellip;
+          </div>
+
+          <div v-if="isSketcher" class="alert alert-success">
+            <strong>Du bist!</strong>
+          </div>
 
           <SketchPad
             ref="sketchPad"
@@ -48,21 +26,92 @@
             @next-path="onNextPath"
           />
 
-          <div v-if="isSketcher" class="alert alert-info sketcher-alert">
-            <strong class="d-block mb-1">Du bist!</strong>
-            <small class="text-muted"
-              >Das Wort, das du für die anderen zeichnen sollst, lautet:</small
-            >
+          <div v-if="isSketcher" class="alert alert-success sketcher-alert">
+            <small class="text-muted">
+              Das Wort, das du zeichnen sollst, ist:
+            </small>
             <span class="d-block guess-word">{{ guessWord }}</span>
+
+            <div class="toolbar">
+              <b-modal
+                id="submit-right-guess-modal"
+                title="Wer hat's erraten?"
+                hide-footer
+              >
+                <template v-for="user in users">
+                  <button
+                    v-if="!user.thatsYou"
+                    :key="user.nickname"
+                    type="button"
+                    class="btn btn-block btn-outline-primary"
+                    @click="onUserSelected(user)"
+                  >
+                    {{ user.nickname }}
+                  </button>
+                </template>
+              </b-modal>
+
+              <button
+                type="button"
+                class="btn btn-link btn-sm font-weight-bold"
+                v-b-modal.submit-right-guess-modal
+              >
+                Richtig geraten
+              </button>
+
+              <button
+                type="button"
+                class="btn btn-link btn-sm font-weight-bold text-danger"
+                @click="onGiveUp"
+              >
+                Aufgeben
+              </button>
+            </div>
+          </div>
+
+          <div v-if="!isSketcher" class="alert alert-info">
+            Was soll das nur sein? 🤔
           </div>
         </div>
+      </div>
 
-        <div class="col">
-          <h4 class="text-right">
-            <small class="text-muted">Info</small>
-          </h4>
+      <div class="order-md-1 col-md col-sm mb-3">
+        <div class="card users-card">
+          <div class="card-header">
+            <strong>Spieler</strong>
+          </div>
 
-          <Chat :chatEntries="chatEntries" />
+          <ul class="list-group list-group-flush leaderboard">
+            <li class="list-group-item header">
+              <small class="nickname-header text-muted">Nickname</small>
+              <small class="guesses-header text-muted">Punkte</small>
+            </li>
+            <li
+              v-for="user in users"
+              :key="user.nickname"
+              class="list-group-item"
+            >
+              <div class="nickname">
+                {{ user.nickname }}
+              </div>
+
+              <div class="guesses">
+                {{ user.correctGuesses }}
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="order-md-3 col-md col-sm mb-3">
+        <div class="card info-card">
+          <div class="card-header text-sm-right">
+            <strong>Info</strong>
+          </div>
+
+          <div class="card-body">
+            <Chat :chatEntries="chatEntries" />
+          </div>
         </div>
       </div>
     </div>
@@ -75,7 +124,6 @@ import Vue from "vue";
 import { mapGetters, mapState } from "vuex";
 
 import SketchPad from "@/components/SketchPad.vue";
-import UserList from "@/components/UserList.vue";
 import Chat from "@/components/Chat.vue";
 import User from "../models/user";
 import Action from "../store/actions";
@@ -84,8 +132,7 @@ import Mutation from "../store/mutations";
 export default Vue.extend({
   components: {
     Chat,
-    SketchPad,
-    UserList
+    SketchPad
   },
   props: {
     id: { type: String }
@@ -107,7 +154,7 @@ export default Vue.extend({
         return this.$store.state.joinRoomForm.nickname;
       }
     },
-    ...mapGetters(["isSketcher"]),
+    ...mapGetters(["isSketcher", "currentSketcher"]),
     ...mapState({
       isConnected: "isConnected",
       users: "users",
@@ -168,16 +215,66 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
+@import "src/styles/helper/shadow";
+
+.leaderboard {
+  .header {
+    border-color: transparent;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+  }
+
+  .list-group-item {
+    display: flex;
+    justify-content: space-between;
+  }
+}
+
 .sketcher-alert {
-  max-width: 500px;
-  margin: auto;
+  line-height: 1;
 
   .guess-word {
+    margin-top: 1rem;
+    margin-bottom: 0.75rem;
     font-size: 1.5rem;
+  }
+
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
   }
 }
 
 .sketchpad-col {
   user-select: none;
+}
+
+.sketchpad-wrapper {
+  @include card(3);
+
+  max-width: 400px;
+  margin: auto;
+
+  // $border-radius
+  border-radius: 0.5rem;
+
+  .alert:first-child {
+    margin-bottom: 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .alert:last-child {
+    margin-bottom: 0;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+}
+
+.info-card,
+.users-card {
+  @include card(1);
+
+  height: 400px;
 }
 </style>

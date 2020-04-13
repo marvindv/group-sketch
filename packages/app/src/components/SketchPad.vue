@@ -259,13 +259,14 @@ export default class SketchPad extends Vue {
 </script>
 
 <style scoped lang="scss">
-@import "src/styles/helper/shadow";
+.sketch-pad {
+  // No idea why but without this the div is slightly higher than the canvas.
+  line-height: 0;
+}
 
 canvas {
   width: 100%;
   max-width: 100%;
   background: white;
-
-  @include card(3);
 }
 </style>

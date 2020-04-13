@@ -25,14 +25,11 @@ export default class Chat extends Vue {
 
 <style lang="scss" scoped>
 .chat {
-  border: 1px solid rgba(0, 0, 0, 0.125);
-  height: 500px;
+  height: 100%;
   overflow-y: scroll;
 
-  padding: 0.5rem;
-
-  .entry {
-    padding: 0.5rem;
+  .entry + .entry {
+    margin-top: 0.5rem;
   }
 }
 </style>

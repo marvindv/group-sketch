@@ -88,6 +88,11 @@ export default new Vuex.Store<State>({
     thisUser: state => state.users.find(u => u.thatsYou),
 
     /**
+     * The current sketcher or `undefined` if there is none.
+     */
+    currentSketcher: state => state.users.find(u => u.isSketcher),
+
+    /**
      * The value indicating whether the current user is the current sketcher.
      */
     isSketcher: (_, getters) => getters.thisUser?.isSketcher || false
