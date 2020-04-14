@@ -15,9 +15,17 @@ export default class Chat extends Vue {
 
   @Prop({ type: Array, required: true }) chatEntries!: string[];
 
+  mounted() {
+    this.scrollDown();
+  }
+
   updated() {
+    this.scrollDown();
+  }
+
+  private scrollDown() {
     if (this.chat) {
-      this.chat.scrollTop = this.chat.clientHeight;
+      this.chat.scrollTop = this.chat.scrollHeight;
     }
   }
 }
