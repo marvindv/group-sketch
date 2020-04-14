@@ -185,6 +185,8 @@ export default Vue.extend({
     }
   },
   mounted() {
+    window.scrollTo(0, 0);
+
     this.unsubscribeStore = this.$store.subscribe(mutation => {
       if (mutation.type === Mutation.NextPath) {
         const payload = mutation.payload as NextPathMessage;
