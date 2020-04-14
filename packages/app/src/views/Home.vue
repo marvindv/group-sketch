@@ -20,7 +20,7 @@
 
             <div v-else class="alert alert-danger text-left mb-4">
               <strong class="d-block">Es ist ein Fehler aufgetreten 😔</strong>
-              Bitte versuche es spaeter noch einmal.
+              Bitte versuche es später noch einmal.
 
               <small class="d-block">
                 Fehler {{ connectFailureError }}:
@@ -41,13 +41,18 @@
               <strong class="d-block">
                 Beim betreten des Raums ist ein Fehler aufgetreten 😔
               </strong>
-              Bitte versuche es spaeter noch einmal.
+              Bitte versuche es später noch einmal.
 
               <small class="d-block">
                 Fehler {{ joinRoomError }}:
                 {{ MessageError[joinRoomError] }}
               </small>
             </div>
+          </div>
+
+          <div v-if="connectionLost" class="alert alert-danger text-left mb-4">
+            <strong class="d-block">Verbindung unterbrochen 😔</strong>
+            Bitte versuche es noch einmal.
           </div>
 
           <form>
@@ -156,7 +161,7 @@ export default Vue.extend({
         });
       }
     },
-    ...mapState(["connectFailureError", "joinRoomError"]),
+    ...mapState(["connectFailureError", "connectionLost", "joinRoomError"]),
     ...mapGetters(["isConnectingToRoom"])
   },
 

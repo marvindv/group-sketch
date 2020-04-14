@@ -143,7 +143,9 @@ export default Vue.extend({
   data() {
     return {
       // Make `MessageError` available in the template.
-      MessageError
+      MessageError,
+
+      unsubscribeStore: null as (() => void) | null
     };
   },
   computed: {
@@ -183,7 +185,7 @@ export default Vue.extend({
     }
   },
   mounted() {
-    this.$store.subscribe(mutation => {
+    this.unsubscribeStore = this.$store.subscribe(mutation => {
       if (mutation.type === Mutation.NextPath) {
         const payload = mutation.payload as NextPathMessage;
         this.sketchPad?.drawPaths([payload.nextPath]);
@@ -192,10 +194,24 @@ export default Vue.extend({
       if (mutation.type === Mutation.NextSketcher) {
         this.sketchPad?.clear();
       }
+
+      if (
+        mutation.type === Mutation.RoomLeft ||
+        mutation.type === Mutation.ConnectionLost
+      ) {
+        this.$store.commit(Mutation.UpdateJoinRoomForm, {
+          roomId: this.id,
+          nickname: this.nickname
+        });
+
+        this.$router.push({ name: "Home" });
+        this.unsubscribeStore();
+      }
     });
   },
   destroyed() {
     this.$store.dispatch(Action.Disconnect);
+    this.unsubscribeStore?.();
   },
   methods: {
     onNextPath(path: Path) {

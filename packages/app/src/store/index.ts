@@ -105,6 +105,7 @@ export default new Vuex.Store<State>({
 
     [Mutation.ConnectFailed](state, payload: ConnectFailedPayload) {
       state.isConnectPending = false;
+      state.connectionLost = false;
       state.connectFailureError = payload.errorCode;
       state.connectAndJoinRoomRequestData = null;
     },
@@ -132,6 +133,7 @@ export default new Vuex.Store<State>({
     },
 
     [Mutation.RoomJoinFailed](state, payload: RoomJoinFailedPayload) {
+      state.connectionLost = false;
       state.joinRoomPending = false;
       state.joinRoomError = payload.errorCode;
     },
