@@ -192,8 +192,8 @@ export default Vue.extend({
       });
 
       this.$store.dispatch(Action.Connect, {
-        nickname: this.nickname,
-        roomId: this.roomId
+        nickname: this.nickname.trim(),
+        roomId: this.roomId.trim()
       });
     }
   }
