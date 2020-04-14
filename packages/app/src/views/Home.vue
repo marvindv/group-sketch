@@ -10,12 +10,13 @@
 
         <div class="card-body">
           <div v-if="connectFailureError !== null">
-            <template
-              v-if="connectFailureError === MessageError.RoomNotFound"
-            ></template>
-            <template
-              v-else-if="connectFailureError === MessageError.NicknameInUse"
-            ></template>
+            <div
+              v-if="connectFailureError === MessageError.AbnormalClosure"
+              class="alert alert-danger text-left mb-4"
+            >
+              <strong class="d-block">Keine Verbindung möglich 😔</strong>
+              Bitte überprüfe deine Internetverbindung.
+            </div>
 
             <div v-else class="alert alert-danger text-left mb-4">
               <strong class="d-block">Es ist ein Fehler aufgetreten 😔</strong>
@@ -28,6 +29,27 @@
             </div>
           </div>
 
+          <div v-if="joinRoomError !== null">
+            <template
+              v-if="joinRoomError === MessageError.RoomNotFound"
+            ></template>
+            <template
+              v-else-if="joinRoomError === MessageError.NicknameInUse"
+            ></template>
+
+            <div v-else class="alert alert-danger text-left mb-4">
+              <strong class="d-block">
+                Beim betreten des Raums ist ein Fehler aufgetreten 😔
+              </strong>
+              Bitte versuche es spaeter noch einmal.
+
+              <small class="d-block">
+                Fehler {{ joinRoomError }}:
+                {{ MessageError[joinRoomError] }}
+              </small>
+            </div>
+          </div>
+
           <form>
             <div class="form-group floating-labels">
               <input
@@ -35,20 +57,20 @@
                 type="text"
                 :class="[
                   'form-control',
-                  connectFailureError === MessageError.RoomNotFound
+                  joinRoomError === MessageError.RoomNotFound
                     ? 'is-invalid'
                     : ''
                 ]"
                 placeholder=" "
                 v-model="roomId"
-                :disabled="isConnecting"
+                :disabled="isConnectingToRoom"
                 @keyup.enter="onLoginClick"
               />
               <label class="form-control-placeholder" for="room-id-input">
                 Name des Raums
               </label>
               <div
-                v-if="connectFailureError === MessageError.RoomNotFound"
+                v-if="joinRoomError === MessageError.RoomNotFound"
                 class="invalid-feedback"
               >
                 Dieser Raum existiert nicht.
@@ -61,20 +83,20 @@
                 type="text"
                 :class="[
                   'form-control',
-                  connectFailureError === MessageError.NicknameInUse
+                  joinRoomError === MessageError.NicknameInUse
                     ? 'is-invalid'
                     : ''
                 ]"
                 placeholder=" "
                 v-model="nickname"
-                :disabled="isConnecting"
+                :disabled="isConnectingToRoom"
                 @keyup.enter="onLoginClick"
               />
               <label class="form-control-placeholder" for="nickname-input">
                 Dein Nickname
               </label>
               <div
-                v-if="connectFailureError === MessageError.NicknameInUse"
+                v-if="joinRoomError === MessageError.NicknameInUse"
                 class="invalid-feedback"
               >
                 Der Nickname ist leider schon vergeben.
@@ -86,7 +108,7 @@
         <button
           type="button"
           class="btn btn-primary card-footer-btn"
-          :disabled="isConnecting"
+          :disabled="isConnectingToRoom"
           @click="onLoginClick"
         >
           🚀 Los gehts!
@@ -134,8 +156,8 @@ export default Vue.extend({
         });
       }
     },
-    ...mapState(["connectFailureError"]),
-    ...mapGetters(["isConnecting"])
+    ...mapState(["connectFailureError", "joinRoomError"]),
+    ...mapGetters(["isConnectingToRoom"])
   },
 
   data() {
@@ -149,14 +171,18 @@ export default Vue.extend({
       event.preventDefault();
 
       const unsubscribe = this.$store.subscribe(mutation => {
-        if (mutation.type === Mutation.ConnectFailed) {
-          unsubscribe();
-        } else if (mutation.type === Mutation.RoomEntered) {
-          unsubscribe();
-          this.$router.push({
-            name: "Room",
-            params: { id: this.roomId as string }
-          });
+        switch (mutation.type) {
+          case Mutation.ConnectFailed:
+          case Mutation.RoomJoinFailed:
+            unsubscribe();
+            break;
+          case Mutation.RoomEntered:
+            unsubscribe();
+            this.$router.push({
+              name: "Room",
+              params: { id: this.roomId as string }
+            });
+            break;
         }
       });
 

@@ -1,11 +1,9 @@
 import {
   CompleteSketchingMessage,
-  MessageError,
   MessageType,
   NewUserMessage,
   NextPathMessage,
   NextSketcherMessage,
-  Path,
   RoomEnteredMessage,
   UserLeftMessage
 } from "@group-sketch/shared";
@@ -14,44 +12,18 @@ import Vuex from "vuex";
 
 import createBackendPlugin from "@/api/backend-plugin";
 import config from "@/config";
-import User from "@/models/user";
 import Action, {
   AddPathPayload,
   CompleteSketchingPayload,
   ConnectPayload
 } from "@/store/actions";
 import Mutation, {
-  ConnectionPendingPayload,
-  ConnectFailedPayload
+  ConnectPendingPayload,
+  ConnectFailedPayload,
+  ConnectionLostPayload,
+  RoomJoinFailedPayload
 } from "@/store/mutations";
-
-export interface State {
-  // Home view state:
-  joinRoomForm: {
-    roomId: string | null;
-    nickname: string | null;
-  };
-
-  // Room state:
-  isConnected: boolean;
-  connectFailureError: MessageError | null;
-  /**
-   * The value indicating whether this client was already connected and lost the connection.
-   *
-   * @type {boolean}
-   * @memberof State
-   */
-  connectionLost: boolean;
-  connectRequestData: {
-    nickname: string;
-    roomId: string;
-  } | null;
-  roomId: string | null;
-  users: User[];
-  guessWord: string | null;
-  chatEntries: string[];
-  sketchPaths: Path[];
-}
+import State from "./state";
 
 Vue.use(Vuex);
 
@@ -66,10 +38,13 @@ export default new Vuex.Store<State>({
       nickname: null
     },
 
+    isConnectPending: false,
     isConnected: false,
     connectFailureError: null,
     connectionLost: false,
-    connectRequestData: null,
+    connectAndJoinRoomRequestData: null,
+    joinRoomPending: false,
+    joinRoomError: null,
     roomId: null,
     users: [],
     guessWord: null,
@@ -78,9 +53,11 @@ export default new Vuex.Store<State>({
   },
   getters: {
     /**
-     * The value indicating whether this client is currently connecting to the backend.
+     * The value indicating whether this client is currently connecting to the backend and joining
+     * a room.
      */
-    isConnecting: state => state.connectRequestData !== null,
+    isConnectingToRoom: state =>
+      state.isConnectPending || state.joinRoomPending,
 
     /**
      * The user object representing this client.
@@ -117,26 +94,53 @@ export default new Vuex.Store<State>({
     ) {
       state.joinRoomForm = { ...payload };
       state.connectFailureError = null;
+      state.joinRoomError = null;
     },
 
-    [Mutation.ChangeConnectionState](state, payload: { isConnected: boolean }) {
-      state.connectionLost = !payload.isConnected && state.isConnected;
-      state.isConnected = payload.isConnected;
-    },
-
-    [Mutation.ConnectPending](state, payload: ConnectionPendingPayload) {
-      state.connectRequestData = { ...payload };
+    [Mutation.ConnectPending](state, payload: ConnectPendingPayload) {
+      state.isConnectPending = true;
+      state.connectFailureError = null;
+      state.connectAndJoinRoomRequestData = { ...payload };
     },
 
     [Mutation.ConnectFailed](state, payload: ConnectFailedPayload) {
-      state.connectFailureError = payload.error;
-      state.connectRequestData = null;
+      state.isConnectPending = false;
+      state.connectFailureError = payload.errorCode;
+      state.connectAndJoinRoomRequestData = null;
+    },
+
+    [Mutation.ConnectionEstablished](state) {
+      state.isConnectPending = false;
+      state.connectFailureError = null;
+      state.connectionLost = false;
+      state.isConnected = true;
+    },
+
+    [Mutation.ConnectionLost](state, _payload: ConnectionLostPayload) {
+      // TODO: Should we do something with the error code?
+      state.connectionLost = true;
+      state.isConnected = false;
+    },
+
+    [Mutation.ConnectionClosed](state) {
+      state.connectionLost = false;
+      state.isConnected = false;
+    },
+
+    [Mutation.JoiningRoom](state) {
+      state.joinRoomPending = true;
+    },
+
+    [Mutation.RoomJoinFailed](state, payload: RoomJoinFailedPayload) {
+      state.joinRoomPending = false;
+      state.joinRoomError = payload.errorCode;
     },
 
     [Mutation.RoomEntered](state, payload: RoomEnteredMessage) {
+      state.joinRoomPending = false;
       state.users = [
         {
-          nickname: state.connectRequestData?.nickname!,
+          nickname: state.connectAndJoinRoomRequestData?.nickname!,
           isSketcher: false,
           thatsYou: true,
           correctGuesses: 0
@@ -148,9 +152,9 @@ export default new Vuex.Store<State>({
           correctGuesses: 0
         }))
       ];
-      state.roomId = state.connectRequestData?.roomId || null;
-      state.connectRequestData = null;
+      state.roomId = state.connectAndJoinRoomRequestData?.roomId || null;
       state.chatEntries = [...state.chatEntries, "Willkommen"];
+      state.connectAndJoinRoomRequestData = null;
     },
 
     [Mutation.RoomLeft](state) {
@@ -173,7 +177,7 @@ export default new Vuex.Store<State>({
       ];
       state.chatEntries = [
         ...state.chatEntries,
-        "Neuer Kumpel: " + payload.nickname
+        "Neuer Spieler: " + payload.nickname
       ];
     },
 
@@ -181,7 +185,7 @@ export default new Vuex.Store<State>({
       state.users = state.users.filter(u => u.nickname !== payload.nickname);
       state.chatEntries = [
         ...state.chatEntries,
-        "Kumpel ist abgehauen: " + payload.nickname
+        "Spieler ist abgehauen: " + payload.nickname
       ];
     },
 

@@ -13,6 +13,13 @@ var MessageError;
      * The error code indicating that there was actually no error. Is used when leaving a room.
      */
     MessageError[MessageError["NormalClosure"] = 1000] = "NormalClosure";
+    /**
+     * Indicates that the connection was closed abnormally, i.e. without a close frame.
+     *
+     * Reserved value, which means is only received as an error code, cannot be used as a status code
+     * for close manually.
+     */
+    MessageError[MessageError["AbnormalClosure"] = 1006] = "AbnormalClosure";
     MessageError[MessageError["InvalidPayload"] = 4000] = "InvalidPayload";
     MessageError[MessageError["RoomNotFound"] = 4001] = "RoomNotFound";
     MessageError[MessageError["NicknameInUse"] = 4002] = "NicknameInUse";

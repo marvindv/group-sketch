@@ -9,9 +9,14 @@ import {
 } from "@group-sketch/shared";
 import { Store } from "vuex";
 
-import { State } from "@/store";
+import State from "@/store/state";
 import Action from "@/store/actions";
-import Mutation, { ConnectionPendingPayload } from "@/store/mutations";
+import Mutation, {
+  ConnectPendingPayload,
+  ConnectFailedPayload,
+  ConnectionLostPayload,
+  RoomJoinFailedPayload
+} from "@/store/mutations";
 
 /**
  * Encapsulated the websocket connection to the backend. Transmits data using the connection on
@@ -30,7 +35,7 @@ export default function createBackendPlugin(apiAddress: string) {
   }
 
   return (store: Store<State>) => {
-    store.subscribeAction((action, state) => {
+    store.subscribeAction(action => {
       switch (action.type) {
         case Action.Disconnect: {
           ws?.close(MessageError.NormalClosure);
@@ -39,7 +44,7 @@ export default function createBackendPlugin(apiAddress: string) {
       }
     });
 
-    store.subscribe(mutation => {
+    store.subscribe((mutation, state) => {
       switch (mutation.type) {
         case Mutation.ConnectPending: {
           // Initiate the websocket connection to the backend. Add event listeners and commit
@@ -47,37 +52,48 @@ export default function createBackendPlugin(apiAddress: string) {
           const {
             nickname,
             roomId
-          } = mutation.payload as ConnectionPendingPayload;
+          } = mutation.payload as ConnectPendingPayload;
           ws = new WebSocket(apiAddress);
 
           ws.addEventListener("open", () => {
+            store.commit(Mutation.ConnectionEstablished);
+            store.commit(Mutation.JoiningRoom);
             send({ type: MessageType.EnterRoom, nickname, roomId });
           });
 
           ws.addEventListener("close", event => {
-            if (event.code !== MessageError.NormalClosure) {
+            store.commit(Mutation.RoomLeft);
+
+            if (event.code === MessageError.NormalClosure) {
+              store.commit(Mutation.ConnectionClosed);
+            } else {
               console.error(
                 `Connection closed: ${event.code}: ${MessageError[event.code]}`,
                 event
               );
-              store.commit(Mutation.ConnectFailed, {
-                error: event.code
-              });
-            }
 
-            store.commit(Mutation.ChangeConnectionState, {
-              isConnected: false
-            });
-            store.commit(Mutation.RoomLeft);
+              if (state.isConnected) {
+                if (state.joinRoomPending) {
+                  store.commit(Mutation.RoomJoinFailed, {
+                    errorCode: event.code
+                  } as RoomJoinFailedPayload);
+                } else {
+                  store.commit(Mutation.ConnectionLost, {
+                    errorCode: event.code
+                  } as ConnectionLostPayload);
+                }
+              } else {
+                store.commit(Mutation.ConnectFailed, {
+                  errorCode: event.code
+                } as ConnectFailedPayload);
+              }
+            }
           });
 
           ws.addEventListener("error", err => {
             console.error("Socket error:", err);
             ws?.close();
             ws = undefined;
-            store.commit(Mutation.ChangeConnectionState, {
-              isConnected: false
-            });
           });
 
           ws.addEventListener("message", event => {
@@ -104,7 +120,6 @@ export default function createBackendPlugin(apiAddress: string) {
             }
           });
 
-          store.commit(Mutation.ChangeConnectionState, { isConnected: true });
           break;
         }
 

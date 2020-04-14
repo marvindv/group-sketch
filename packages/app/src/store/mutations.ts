@@ -15,22 +15,9 @@ export enum Mutation {
   UpdateJoinRoomForm = "UPDATE_JOIN_ROOM_FORM",
 
   /**
-   * Changes the `isConnected` state.
-   *
-   * Payload:
-   *
-   * ```
-   * {
-   *   isConnected: boolean;
-   * }
-   * ```
-   */
-  ChangeConnectionState = "CHANGE_CONNECTION_STATE",
-
-  /**
    * Adjusts the state to indicate that the connection process is pending.
    *
-   * Payload: {@link ConnectionPendingPayload}
+   * Payload: {@link ConnectPendingPayload}
    */
   ConnectPending = "CONNECT_PENDING",
 
@@ -40,6 +27,36 @@ export enum Mutation {
    * Payload: {@link ConnectFailedPayload}
    */
   ConnectFailed = "CONNECT_FAILED",
+
+  /**
+   * Indicates that the connection attempt was successful and the connection to the backend is
+   * established.
+   */
+  ConnectionEstablished = "CONNECTION_ESTABLISHED",
+
+  /**
+   * Indicates the the current connection to the backend was lost unexpectedly.
+   *
+   * Payload: {@link ConnectionLostPayload}
+   */
+  ConnectionLost = "CONNECTION_LOST",
+
+  /**
+   * Indicates the the current connection to the backend was closed under normal circumstances.
+   */
+  ConnectionClosed = "CONNECTION_CLOSED",
+
+  /**
+   * Indicates that this client is now in the process of joining a room.
+   */
+  JoiningRoom = "JOINING_ROOM",
+
+  /**
+   * Indicates that joining a room failed.
+   *
+   * Payload {@link RoomJoinFailedPayload}
+   */
+  RoomJoinFailed = "ROOM_JOIN_FAILED",
 
   /**
    * A room was successfully entered.
@@ -97,13 +114,21 @@ export enum Mutation {
   NextPath = "NEXT_PATH"
 }
 
-export interface ConnectionPendingPayload {
+export interface ConnectPendingPayload {
   nickname: string;
   roomId: string;
 }
 
 export interface ConnectFailedPayload {
-  error: MessageError | number;
+  errorCode: MessageError | number;
+}
+
+export interface ConnectionLostPayload {
+  errorCode: MessageError | number;
+}
+
+export interface RoomJoinFailedPayload {
+  errorCode: MessageError | number;
 }
 
 export default Mutation;

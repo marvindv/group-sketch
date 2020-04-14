@@ -142,6 +142,7 @@ export default Vue.extend({
   },
   data() {
     return {
+      // Make `MessageError` available in the template.
       MessageError
     };
   },
@@ -165,7 +166,7 @@ export default Vue.extend({
     ...mapState({
       isConnected: "isConnected",
       connectFailureError: "connectFailureError",
-      connectionLost: "connectionList",
+      connectionLost: "connectionLost",
       guessWord: "guessWord",
       chatEntries: "chatEntries",
       sketchPaths: "sketchPaths"

@@ -11,6 +11,13 @@ export declare enum MessageError {
      * The error code indicating that there was actually no error. Is used when leaving a room.
      */
     NormalClosure = 1000,
+    /**
+     * Indicates that the connection was closed abnormally, i.e. without a close frame.
+     *
+     * Reserved value, which means is only received as an error code, cannot be used as a status code
+     * for close manually.
+     */
+    AbnormalClosure = 1006,
     InvalidPayload = 4000,
     RoomNotFound = 4001,
     NicknameInUse = 4002,
