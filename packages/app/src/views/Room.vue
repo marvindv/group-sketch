@@ -37,6 +37,9 @@
                 id="submit-right-guess-modal"
                 title="Wer hat's erraten?"
                 hide-footer
+                size="sm"
+                scrollable
+                centered
               >
                 <template v-for="user in users">
                   <button
