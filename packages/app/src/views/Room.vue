@@ -252,7 +252,7 @@ export default Vue.extend({
         });
 
         this.$router.push({ name: "Home" });
-        this.unsubscribeStore();
+        this.unsubscribeStore?.();
       }
     });
   },

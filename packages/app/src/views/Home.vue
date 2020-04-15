@@ -140,7 +140,7 @@ import Action from "../store/actions";
 export default Vue.extend({
   computed: {
     roomId: {
-      get() {
+      get(): string {
         return this.$store.state.joinRoomForm.roomId;
       },
       set(value: string) {
@@ -151,7 +151,7 @@ export default Vue.extend({
       }
     },
     nickname: {
-      get() {
+      get(): string {
         return this.$store.state.joinRoomForm.nickname;
       },
       set(value: string) {
