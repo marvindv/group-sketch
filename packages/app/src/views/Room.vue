@@ -1,11 +1,45 @@
 <template>
   <div class="container-fluid room">
-    <div v-if="connectionLost" class="alert alert-danger">
-      <strong>Verbindung abgebrochen!</strong>&nbsp;
-      <a href="javascript:window.location.reload();">Seite neu laden</a>
-    </div>
+    <ul class="nav nav-pills nav-justified d-flex d-md-none">
+      <li class="nav-item">
+        <a
+          :class="['nav-link', selectedCol === 'leaderboard' ? 'active' : '']"
+          href="javascript:void(0)"
+          @click="selectedCol = 'leaderboard'"
+        >
+          🏆
+        </a>
+      </li>
+      <li class="nav-item">
+        <a
+          :class="['nav-link', selectedCol === 'sketchpad' ? 'active' : '']"
+          href="javascript:void(0)"
+          @click="selectedCol = 'sketchpad'"
+        >
+          ✏️
+        </a>
+      </li>
+      <li class="nav-item">
+        <a
+          :class="['nav-link', selectedCol === 'log' ? 'active' : '']"
+          href="javascript:void(0)"
+          @click="selectedCol = 'log'"
+        >
+          ℹ️
+        </a>
+      </li>
+    </ul>
 
-    <div class="dashboard row">
+    <div class="d-none d-md-block mb-4"></div>
+
+    <div
+      :class="{
+        'dashboard row': true,
+        'sketchpad-selected': selectedCol === 'sketchpad',
+        'leaderboard-selected': selectedCol === 'leaderboard',
+        'log-selected': selectedCol === 'log'
+      }"
+    >
       <div class="order-md-2 col-md text-center sketchpad-col mb-3">
         <div class="sketchpad-wrapper">
           <div v-if="!currentSketcher" class="alert alert-info">
@@ -78,7 +112,12 @@
         </div>
       </div>
 
-      <div class="order-md-1 col-md col-sm mb-3">
+      <div
+        :class="[
+          'order-md-1 col-md col-sm mb-3 leaderboard-col',
+          selectedCol === 'leaderboard' ? 'selected' : null
+        ]"
+      >
         <div class="card users-card">
           <div class="card-header">
             <strong>Spieler</strong>
@@ -106,9 +145,14 @@
         </div>
       </div>
 
-      <div class="order-md-3 col-md col-sm mb-3">
+      <div
+        :class="[
+          'order-md-3 col-md col-sm mb-3 log-col',
+          selectedCol === 'log' ? 'selected' : null
+        ]"
+      >
         <div class="card info-card">
-          <div class="card-header text-sm-right">
+          <div class="card-header text-md-right">
             <strong>Info</strong>
           </div>
 
@@ -145,7 +189,8 @@ export default Vue.extend({
       // Make `MessageError` available in the template.
       MessageError,
 
-      unsubscribeStore: null as (() => void) | null
+      unsubscribeStore: null as (() => void) | null,
+      selectedCol: "sketchpad" as "sketchpad" | "leaderboard" | "log"
     };
   },
   computed: {
@@ -242,6 +287,19 @@ export default Vue.extend({
 <style lang="scss" scoped>
 @import "src/styles/helper/shadow";
 
+.nav {
+  margin-bottom: 1rem;
+  background: white;
+  padding: 0.5rem;
+  margin-left: -15px;
+  margin-right: -15px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+
+  @include card(2);
+}
+
 .leaderboard {
   .header {
     border-color: transparent;
@@ -275,7 +333,7 @@ export default Vue.extend({
 }
 
 .sketchpad-wrapper {
-  @include card(3);
+  @include card(1);
 
   max-width: 400px;
   margin: auto;
@@ -301,5 +359,43 @@ export default Vue.extend({
   @include card(1);
 
   height: 400px;
+}
+
+// @include media-breakpoint-down(sm)
+@media (max-width: 767.98px) {
+  .room {
+    position: relative;
+    overflow-x: hidden;
+    height: 100vh;
+  }
+
+  .dashboard {
+    position: absolute;
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
+    left: 0%;
+    // $transition-base
+    transition: left 0.2s ease-in-out;
+  }
+
+  .leaderboard-col {
+    position: absolute;
+
+    left: -100%;
+  }
+
+  .log-col {
+    position: absolute;
+    right: -100%;
+  }
+
+  .dashboard.leaderboard-selected {
+    left: 100%;
+  }
+
+  .dashboard.log-selected {
+    left: -100%;
+  }
 }
 </style>

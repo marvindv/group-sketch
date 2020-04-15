@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container mt-4">
     <div class="content text-center">
       <h1 class="text-center mb-5" title="Group Sketch">👪✏️</h1>
 
