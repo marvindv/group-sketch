@@ -157,6 +157,9 @@ export default new Vuex.Store<State>({
       state.roomId = state.connectAndJoinRoomRequestData?.roomId || null;
       state.chatEntries = [...state.chatEntries, "Willkommen"];
       state.connectAndJoinRoomRequestData = null;
+      state.sketchPaths = payload.currentSketching
+        ? [...payload.currentSketching]
+        : [];
     },
 
     [Mutation.RoomLeft](state) {

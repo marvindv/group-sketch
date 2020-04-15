@@ -53,6 +53,7 @@ export interface RoomEnteredMessage {
   type: MessageType.RoomEntered;
   nicknames: string[];
   currentSketcher: string | undefined;
+  currentSketching: Path[] | undefined;
 }
 
 export interface NewUserMessage {

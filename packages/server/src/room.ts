@@ -22,6 +22,7 @@ export default class Room {
   private currentSketcher: Client | undefined;
   private recentSketcher: Client[] = [];
   private currentGuessWord: string | undefined;
+  private currentSketching: Path[] | undefined;
   private availableGuessWords: string[] = [...GUESS_WORDS];
 
   /**
@@ -33,7 +34,8 @@ export default class Room {
     newClient.send({
       type: MessageType.RoomEntered,
       nicknames: this.getNicknames(),
-      currentSketcher: this.currentSketcher?.getNickname()
+      currentSketcher: this.currentSketcher?.getNickname(),
+      currentSketching: this.currentSketching
     });
 
     this.broadcast({
@@ -74,6 +76,8 @@ export default class Room {
   }
 
   broadcastPath(source: Client, path: Path) {
+    this.currentSketching?.push(path);
+
     const message: Message = {
       type: MessageType.NextPath,
       nextPath: path
@@ -98,6 +102,7 @@ export default class Room {
       guessWord: this.currentGuessWord
     };
     this.currentGuessWord = undefined;
+    this.currentSketching = undefined;
     this.currentSketcher?.setSketcher(false);
     this.currentSketcher = undefined;
     this.broadcast(broadcastMessage);
@@ -125,6 +130,7 @@ export default class Room {
     this.recentSketcher.push(next);
     next.setSketcher(true);
     this.currentSketcher = next;
+    this.currentSketching = [];
 
     const message: NextSketcherMessage = {
       type: MessageType.NextSketcher,

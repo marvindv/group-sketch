@@ -166,7 +166,12 @@
 </template>
 
 <script lang="ts">
-import { Path, NextPathMessage, MessageError } from "@group-sketch/shared";
+import {
+  Path,
+  NextPathMessage,
+  MessageError,
+  RoomEnteredMessage
+} from "@group-sketch/shared";
 import Vue from "vue";
 import { mapGetters, mapState } from "vuex";
 
@@ -232,13 +237,20 @@ export default Vue.extend({
   mounted() {
     window.scrollTo(0, 0);
 
+    if (this.sketchPaths) {
+      this.sketchPad?.drawPaths(this.sketchPaths);
+    }
+
     this.unsubscribeStore = this.$store.subscribe(mutation => {
       if (mutation.type === Mutation.NextPath) {
         const payload = mutation.payload as NextPathMessage;
         this.sketchPad?.drawPaths([payload.nextPath]);
       }
 
-      if (mutation.type === Mutation.NextSketcher) {
+      if (
+        mutation.type === Mutation.NextSketcher ||
+        mutation.type === Mutation.SketchingCompleted
+      ) {
         this.sketchPad?.clear();
       }
 
