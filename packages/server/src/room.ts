@@ -97,6 +97,9 @@ export default class Room {
       ...message,
       guessWord: this.currentGuessWord
     };
+    this.currentGuessWord = undefined;
+    this.currentSketcher?.setSketcher(false);
+    this.currentSketcher = undefined;
     this.broadcast(broadcastMessage);
     this.selectNextSketcher();
   }

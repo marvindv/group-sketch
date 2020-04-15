@@ -217,6 +217,13 @@ export default new Vuex.Store<State>({
           return user;
         });
       }
+
+      // Unset the current sketcher.
+      state.users = state.users.map(u =>
+        u.isSketcher ? { ...u, isSketcher: false } : u
+      );
+      state.guessWord = null;
+      state.sketchPaths = [];
     },
 
     [Mutation.NextSketcher](state, payload: NextSketcherMessage) {
