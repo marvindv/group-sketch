@@ -15,7 +15,7 @@ export default class Room {
   };
 
   static getById(id: string): Room | undefined {
-    return this.rooms[id];
+    return this.rooms[id.toLowerCase()];
   }
 
   private clients: Client[] = [];
