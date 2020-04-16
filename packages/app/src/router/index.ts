@@ -2,6 +2,7 @@ import Vue from "vue";
 import VueRouter from "vue-router";
 import Room from "../views/Room.vue";
 import Home from "../views/Home.vue";
+import CreateRoom from "../views/CreateRoom.vue";
 
 Vue.use(VueRouter);
 
@@ -16,6 +17,11 @@ const routes = [
     props: true,
     name: "Room",
     component: Room
+  },
+  {
+    path: "/create",
+    name: "CreateRoom",
+    component: CreateRoom
   },
   {
     path: "/about",

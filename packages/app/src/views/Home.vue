@@ -122,9 +122,12 @@
 
       <div class="text-muted my-3">oder</div>
 
-      <button type="button" class="btn btn-secondary btn-block create-room-btn">
+      <router-link
+        to="/create"
+        class="btn btn-secondary btn-block create-room-btn"
+      >
         Raum erstellen
-      </button>
+      </router-link>
     </div>
   </div>
 </template>
