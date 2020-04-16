@@ -1,7 +1,7 @@
 <template>
   <div class="container mt-4">
     <div class="content text-center">
-      <h1 class="text-center mb-5" title="Group Sketch">👪✏️</h1>
+      <h1 class="mb-5" title="Group Sketch">👪✏️</h1>
 
       <div class="card text-center">
         <div class="card-header">
