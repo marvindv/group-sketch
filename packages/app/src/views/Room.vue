@@ -51,7 +51,23 @@
           </div>
 
           <div v-if="isSketcher" class="alert alert-success">
-            <strong>Du bist!</strong>
+            <div class="d-flex justify-content-between align-items-center">
+              <button
+                type="button"
+                class="btn btn-light btn-sm"
+                @click="onUndoPathClick"
+              >
+                ↩️
+              </button>
+              <strong>Du bist!</strong>
+              <button
+                type="button"
+                class="btn btn-light btn-sm"
+                @click="onClearSketchingClick"
+              >
+                🗑
+              </button>
+            </div>
           </div>
 
           <SketchPad
@@ -166,12 +182,7 @@
 </template>
 
 <script lang="ts">
-import {
-  Path,
-  NextPathMessage,
-  MessageError,
-  RoomEnteredMessage
-} from "@group-sketch/shared";
+import { Path, NextPathMessage, MessageError } from "@group-sketch/shared";
 import Vue from "vue";
 import { mapGetters, mapState } from "vuex";
 
@@ -180,6 +191,7 @@ import Chat from "@/components/Chat.vue";
 import User from "../models/user";
 import Action from "../store/actions";
 import Mutation from "../store/mutations";
+import State from "../store/state";
 
 export default Vue.extend({
   components: {
@@ -241,10 +253,19 @@ export default Vue.extend({
       this.sketchPad?.drawPaths(this.sketchPaths);
     }
 
-    this.unsubscribeStore = this.$store.subscribe(mutation => {
+    this.unsubscribeStore = this.$store.subscribe((mutation, state: State) => {
       if (mutation.type === Mutation.NextPath) {
         const payload = mutation.payload as NextPathMessage;
         this.sketchPad?.drawPaths([payload.nextPath]);
+      }
+
+      if (mutation.type === Mutation.PathUndone) {
+        this.sketchPad?.clear();
+        this.sketchPad?.drawPaths(state.sketchPaths);
+      }
+
+      if (mutation.type === Mutation.SketchingCleared) {
+        this.sketchPad?.clear();
       }
 
       if (
@@ -273,6 +294,14 @@ export default Vue.extend({
     this.unsubscribeStore?.();
   },
   methods: {
+    onUndoPathClick() {
+      this.$store.dispatch(Action.UndoPath);
+    },
+
+    onClearSketchingClick() {
+      this.$store.dispatch(Action.ClearSketching);
+    },
+
     onNextPath(path: Path) {
       this.$store.dispatch(Action.AddPath, { path });
     },

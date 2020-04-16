@@ -8,7 +8,9 @@ import {
   MessageError,
   NextPathMessage,
   TextMessage,
-  CompleteSketchingMessage
+  CompleteSketchingMessage,
+  UndoPathMessage,
+  ClearSketchingMessage
 } from "@group-sketch/shared";
 
 import Room from "./room";
@@ -36,6 +38,14 @@ export default class Client {
 
         case MessageType.NextPath:
           this.handleNextPath(message);
+          break;
+
+        case MessageType.UndoPath:
+          this.handleUndoPath(message);
+          break;
+
+        case MessageType.ClearSketching:
+          this.handleClearSketching(message);
           break;
 
         case MessageType.Text:
@@ -70,7 +80,11 @@ export default class Client {
   }
 
   send(message: Message) {
-    console.log("SEND to", this.nickname + ":", message);
+    console.log(
+      `SEND to [${this.nickname}] Type ${MessageType[message.type]}:`,
+      message
+    );
+
     this.ws.send(prepareMessage(message));
   }
 
@@ -159,6 +173,30 @@ export default class Client {
     }
 
     this.room?.broadcastPath(this, message.nextPath);
+  }
+
+  private handleUndoPath(message: UndoPathMessage) {
+    if (this.state !== ClientState.Sketcher) {
+      console.error(
+        "Received UndoPath from client in state",
+        ClientState[this.state]
+      );
+      return;
+    }
+
+    this.room?.undoPath();
+  }
+
+  private handleClearSketching(message: ClearSketchingMessage) {
+    if (this.state !== ClientState.Sketcher) {
+      console.error(
+        "Received CompleteSketching from client in state",
+        ClientState[this.state]
+      );
+      return;
+    }
+
+    this.room?.clearSketching();
   }
 
   /**

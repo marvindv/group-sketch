@@ -30,12 +30,28 @@ export declare enum MessageType {
     UserLeft = 3,
     Text = 4,
     NextPath = 5,
-    CompleteSketching = 6,
-    NextSketcher = 7
+    UndoPath = 6,
+    ClearSketching = 7,
+    CompleteSketching = 8,
+    NextSketcher = 9
 }
 export interface NextPathMessage {
     type: MessageType.NextPath;
     nextPath: Path;
+}
+/**
+ * The sketcher sends this message to undo the last drawn path. The message is then broadcasted by
+ * the backend to all clients in the room of the sketcher.
+ */
+export interface UndoPathMessage {
+    type: MessageType.UndoPath;
+}
+/**
+ * The sketcher sends this message to clear the current skeching to start all over. The message is
+ * then broadcasted by the backend to all clients in the room of the sketcher.
+ */
+export interface ClearSketchingMessage {
+    type: MessageType.ClearSketching;
 }
 export interface EnterRoomMessage {
     type: MessageType.EnterRoom;
@@ -86,6 +102,6 @@ export interface NextSketcherMessage {
      */
     guessWord?: string;
 }
-export declare type Message = NextPathMessage | EnterRoomMessage | RoomEnteredMessage | NewUserMessage | UserLeftMessage | TextMessage | CompleteSketchingMessage | NextSketcherMessage;
+export declare type Message = NextPathMessage | UndoPathMessage | ClearSketchingMessage | EnterRoomMessage | RoomEnteredMessage | NewUserMessage | UserLeftMessage | TextMessage | CompleteSketchingMessage | NextSketcherMessage;
 export declare function extractMessage(messageData: string): Message;
 export declare function prepareMessage(event: Message): string;

@@ -41,6 +41,16 @@ export default function createBackendPlugin(apiAddress: string) {
           ws?.close(MessageError.NormalClosure);
           break;
         }
+
+        case Action.UndoPath: {
+          send({ type: MessageType.UndoPath });
+          break;
+        }
+
+        case Action.ClearSketching: {
+          send({ type: MessageType.ClearSketching });
+          break;
+        }
       }
     });
 
@@ -113,6 +123,12 @@ export default function createBackendPlugin(apiAddress: string) {
                 break;
               case MessageType.NextPath:
                 store.commit(Mutation.NextPath, message);
+                break;
+              case MessageType.UndoPath:
+                store.commit(Mutation.PathUndone);
+                break;
+              case MessageType.ClearSketching:
+                store.commit(Mutation.SketchingCleared);
                 break;
               case MessageType.CompleteSketching:
                 store.commit(Mutation.SketchingCompleted, message);

@@ -34,6 +34,8 @@ export enum MessageType {
   UserLeft,
   Text,
   NextPath,
+  UndoPath,
+  ClearSketching,
   CompleteSketching,
   NextSketcher
 }
@@ -41,6 +43,22 @@ export enum MessageType {
 export interface NextPathMessage {
   type: MessageType.NextPath;
   nextPath: Path;
+}
+
+/**
+ * The sketcher sends this message to undo the last drawn path. The message is then broadcasted by
+ * the backend to all clients in the room of the sketcher.
+ */
+export interface UndoPathMessage {
+  type: MessageType.UndoPath;
+}
+
+/**
+ * The sketcher sends this message to clear the current skeching to start all over. The message is
+ * then broadcasted by the backend to all clients in the room of the sketcher.
+ */
+export interface ClearSketchingMessage {
+  type: MessageType.ClearSketching;
 }
 
 export interface EnterRoomMessage {
@@ -104,6 +122,8 @@ export interface NextSketcherMessage {
 
 export type Message =
   | NextPathMessage
+  | UndoPathMessage
+  | ClearSketchingMessage
   | EnterRoomMessage
   | RoomEnteredMessage
   | NewUserMessage

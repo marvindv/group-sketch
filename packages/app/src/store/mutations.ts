@@ -111,7 +111,17 @@ export enum Mutation {
    *
    * Payload: {@link NextPathMessage}
    */
-  NextPath = "NEXT_PATH"
+  NextPath = "NEXT_PATH",
+
+  /**
+   * The latest path by the sketcher was undone.
+   */
+  PathUndone = "PATH_UNDONE",
+
+  /**
+   * The whole sketching was cleared by the sketcher.
+   */
+  SketchingCleared = "SKETCHING_CLEARED"
 }
 
 export interface ConnectPendingPayload {

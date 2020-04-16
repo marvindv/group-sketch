@@ -90,6 +90,19 @@ export default class Room {
     }
   }
 
+  undoPath() {
+    this.currentSketching = this.currentSketching?.slice(
+      0,
+      this.currentSketching.length - 1
+    );
+    this.broadcast({ type: MessageType.UndoPath });
+  }
+
+  clearSketching() {
+    this.currentSketching = [];
+    this.broadcast({ type: MessageType.ClearSketching });
+  }
+
   broadcast(message: Message) {
     for (const client of this.clients) {
       client.send(message);

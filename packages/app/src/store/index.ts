@@ -240,12 +240,26 @@ export default new Vuex.Store<State>({
       state.guessWord = payload.guessWord || null;
     },
 
-    [Mutation.RequestNextPath]() {
+    [Mutation.RequestNextPath](state, payload: NextPathMessage) {
+      state.sketchPaths = [...state.sketchPaths, payload.nextPath];
       return;
     },
 
     [Mutation.NextPath](state, payload: NextPathMessage) {
       state.sketchPaths = [...state.sketchPaths, payload.nextPath];
+    },
+
+    [Mutation.PathUndone](state) {
+      if (state.sketchPaths.length > 0) {
+        state.sketchPaths = state.sketchPaths.slice(
+          0,
+          state.sketchPaths.length - 1
+        );
+      }
+    },
+
+    [Mutation.SketchingCleared](state) {
+      state.sketchPaths = [];
     }
   },
 
@@ -265,6 +279,16 @@ export default new Vuex.Store<State>({
         nextPath: payload.path
       };
       context.commit(Mutation.RequestNextPath, newPayload);
+    },
+
+    [Action.UndoPath](context) {
+      // Nothing to do here. The websocket backend plugin will do the whole job.
+      return;
+    },
+
+    [Action.ClearSketching](context) {
+      // Nothing to do here. The websocket backend plugin will do the whole job.
+      return;
     },
 
     [Action.CompleteSketching](context, payload: CompleteSketchingPayload) {

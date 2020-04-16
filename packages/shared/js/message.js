@@ -33,8 +33,10 @@ var MessageType;
     MessageType[MessageType["UserLeft"] = 3] = "UserLeft";
     MessageType[MessageType["Text"] = 4] = "Text";
     MessageType[MessageType["NextPath"] = 5] = "NextPath";
-    MessageType[MessageType["CompleteSketching"] = 6] = "CompleteSketching";
-    MessageType[MessageType["NextSketcher"] = 7] = "NextSketcher";
+    MessageType[MessageType["UndoPath"] = 6] = "UndoPath";
+    MessageType[MessageType["ClearSketching"] = 7] = "ClearSketching";
+    MessageType[MessageType["CompleteSketching"] = 8] = "CompleteSketching";
+    MessageType[MessageType["NextSketcher"] = 9] = "NextSketcher";
 })(MessageType = exports.MessageType || (exports.MessageType = {}));
 function extractMessage(messageData) {
     var json;

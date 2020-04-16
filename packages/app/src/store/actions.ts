@@ -21,6 +21,16 @@ export enum Action {
   AddPath = "ADD_PATH",
 
   /**
+   * Undo the latest path. Client must be the sketcher.
+   */
+  UndoPath = "UNDO_PATH",
+
+  /**
+   * Clears the current sketching. Client must be the sketcher.
+   */
+  ClearSketching = "CLEAR_SKETCHING",
+
+  /**
    * Requests the completion of the current sketching.
    *
    * Payload: {@link CompleteSketchingPayload}
