@@ -11,7 +11,7 @@ import GUESS_WORDS from "./guess-words";
 
 export default class Room {
   private static rooms: { [id: string]: Room } = {
-    default: new Room()
+    kneipe: new Room()
   };
 
   static getById(id: string): Room | undefined {
