@@ -1,6 +1,6 @@
 <template>
   <div class="container-fluid room">
-    <ul class="nav nav-pills nav-justified d-flex d-md-none">
+    <ul class="nav nav-pills nav-justified d-flex d-lg-none">
       <li class="nav-item">
         <a
           :class="['nav-link', selectedCol === 'leaderboard' ? 'active' : '']"
@@ -30,7 +30,7 @@
       </li>
     </ul>
 
-    <div class="d-none d-md-block mb-4"></div>
+    <div class="d-none d-lg-block mb-4"></div>
 
     <div
       :class="{
@@ -40,7 +40,7 @@
         'log-selected': selectedCol === 'log'
       }"
     >
-      <div class="order-md-2 col-md text-center sketchpad-col mb-3">
+      <div class="order-lg-2 col-lg-6 col-xl text-center sketchpad-col mb-3">
         <div class="sketchpad-wrapper">
           <div v-if="!currentSketcher" class="alert alert-info">
             Warte auf mehr Spieler &hellip;
@@ -130,7 +130,7 @@
 
       <div
         :class="[
-          'order-md-1 col-md col-sm mb-3 leaderboard-col',
+          'order-lg-1 col-lg col-sm mb-3 leaderboard-col',
           selectedCol === 'leaderboard' ? 'selected' : null
         ]"
       >
@@ -163,12 +163,12 @@
 
       <div
         :class="[
-          'order-md-3 col-md col-sm mb-3 log-col',
+          'order-lg-3 col-lg col-sm mb-3 log-col',
           selectedCol === 'log' ? 'selected' : null
         ]"
       >
         <div class="card info-card">
-          <div class="card-header text-md-right">
+          <div class="card-header text-lg-right">
             <strong>Info</strong>
           </div>
 
@@ -376,7 +376,7 @@ export default Vue.extend({
 .sketchpad-wrapper {
   @include card(1);
 
-  max-width: 400px;
+  max-width: 60vh;
   margin: auto;
 
   // $border-radius
@@ -408,8 +408,8 @@ export default Vue.extend({
   }
 }
 
-// @include media-breakpoint-down(sm)
-@media (max-width: 767.98px) {
+// @include media-breakpoint-down(md)
+@media (max-width: 991.98px) {
   .room {
     position: relative;
     overflow-x: hidden;
