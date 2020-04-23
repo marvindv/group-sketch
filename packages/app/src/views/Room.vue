@@ -400,6 +400,12 @@ export default Vue.extend({
   @include card(1);
 
   height: 400px;
+
+  .card-body {
+    // Fix for Safari misbehaving with height: 100% in .chat from
+    // https://github.com/philipwalton/flexbugs/issues/197#issuecomment-283211783
+    flex: 1 1 0;
+  }
 }
 
 // @include media-breakpoint-down(sm)
