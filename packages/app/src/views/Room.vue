@@ -246,6 +246,20 @@ export default Vue.extend({
       this.$router.push({ name: "Home" });
     }
   },
+  beforeRouteLeave(to, from, next) {
+    if (!this.isConnected) {
+      next();
+      return;
+    }
+    const answer = window.confirm(
+      "Willst du den Raum wirklich verlassen? Deine Punkte gehen dann verloren :("
+    );
+    if (answer) {
+      next();
+    } else {
+      next(false);
+    }
+  },
   mounted() {
     window.scrollTo(0, 0);
 
