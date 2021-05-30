@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@group-sketch/shared": "0.0.1",
-    "ws": "7.2.3"
+    "ws": "7.4.6"
   },
   "devDependencies": {
     "@types/ws": "7.2.3",
